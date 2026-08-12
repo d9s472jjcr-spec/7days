@@ -1,0 +1,15 @@
+{
+  "name": "神は7日で世界を作った",
+  "short_name": "7days",
+  "description": "人物画像生成用の日本語指示文を端末内だけで作成します。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f2eb",
+  "theme_color": "#f6f2eb",
+  "lang": "ja",
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

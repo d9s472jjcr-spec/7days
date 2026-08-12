@@ -1,0 +1,182 @@
+export const fixedLines = [
+  "ユーザー指示",
+  "画像の新規生成",
+  "フォトリアル",
+  "架空の20代の成人日本人女性",
+];
+
+export const fields = [
+  {
+    id: "beauty",
+    label: "容姿",
+    section: "人物",
+    options: ["美人", "端正な顔立ち", "上品な美人", "親しみやすい美人", "クールな美人"],
+  },
+  {
+    id: "body",
+    label: "体型",
+    section: "人物",
+    options: ["モデル体型", "スレンダー体型", "健康的で均整の取れた体型", "グラマラスな体型", "アスリート体型"],
+  },
+  {
+    id: "bust",
+    label: "バスト",
+    section: "人物",
+    options: ["バストがとても豊か", "バストが豊か", "標準的なバスト", "控えめなバスト"],
+  },
+  {
+    id: "topType",
+    label: "トップス",
+    section: "衣装",
+    prefix: "トップスは",
+    colorField: "topColor",
+    options: ["長袖ボタンアップシャツ", "半袖ブラウス", "タートルネックニット", "クルーネックニット", "テーラードジャケット", "シンプルなTシャツ", "ノースリーブブラウス"],
+  },
+  {
+    id: "topColor",
+    label: "トップスの色",
+    section: "衣装",
+    type: "color",
+  },
+  {
+    id: "bottomType",
+    label: "ボトムス",
+    section: "衣装",
+    prefix: "ボトムスは",
+    colorField: "bottomColor",
+    options: ["スラックス", "テーパードパンツ", "ストレートパンツ", "ワイドパンツ", "膝丈タイトスカート", "ロングプリーツスカート", "Aラインスカート"],
+  },
+  {
+    id: "bottomColor",
+    label: "ボトムスの色",
+    section: "衣装",
+    type: "color",
+  },
+  {
+    id: "baseColor",
+    label: "衣装の基調カラー",
+    section: "衣装",
+    type: "color",
+    prefix: "衣装の基調カラーは",
+  },
+  {
+    id: "hairColor",
+    label: "髪色",
+    section: "髪・瞳",
+    type: "color",
+    palette: "hair",
+    prefix: "髪色は",
+  },
+  {
+    id: "hairstyle",
+    label: "髪型",
+    section: "髪・瞳",
+    prefix: "髪型は",
+    options: ["流し前髪のボブ", "前髪ありのショートボブ", "センターパートのボブ", "流し前髪のミディアムヘア", "前髪ありのストレートロング", "センターパートのストレートロング", "低い位置のポニーテール", "ゆるいウェーブのロングヘア"],
+  },
+  {
+    id: "eyeColor",
+    label: "瞳の色",
+    section: "髪・瞳",
+    type: "color",
+    palette: "eyes",
+    prefix: "瞳の色は",
+  },
+  {
+    id: "expression",
+    label: "表情（任意）",
+    section: "撮影設定",
+    optional: true,
+    prefix: "表情は",
+    options: ["", "自然な微笑み", "穏やかな微笑み", "落ち着いたニュートラルな表情", "自信のある表情", "やさしい表情", "凛とした表情"],
+  },
+  {
+    id: "pose",
+    label: "ポーズ（任意）",
+    section: "撮影設定",
+    optional: true,
+    prefix: "ポーズは",
+    options: ["", "自然な直立姿勢", "正面を向いた直立姿勢", "体をわずかに斜めにした立ち姿", "片手を腰に添えた立ち姿", "腕を自然に下ろした立ち姿", "椅子に浅く腰掛けた姿勢"],
+  },
+  {
+    id: "framing",
+    label: "構図（任意）",
+    section: "撮影設定",
+    optional: true,
+    prefix: "構図は",
+    options: ["", "全身が入る縦位置", "頭から膝までが入る縦位置", "ウエストアップ", "バストアップ", "目線の高さからの正面撮影", "わずかに斜め前からの撮影"],
+  },
+  {
+    id: "background",
+    label: "背景（任意）",
+    section: "撮影設定",
+    optional: true,
+    prefix: "背景は",
+    options: ["", "無地のライトグレーのスタジオ背景", "無地のホワイトのスタジオ背景", "落ち着いた室内", "明るいオフィス", "自然光の入る窓辺", "背景を自然にぼかした屋外"],
+  },
+  {
+    id: "lighting",
+    label: "照明（任意）",
+    section: "撮影設定",
+    optional: true,
+    prefix: "照明は",
+    options: ["", "柔らかなスタジオ照明", "窓から入る柔らかな自然光", "均一な拡散光", "輪郭を自然に見せる斜め前方からの光", "明るく清潔感のあるハイキー照明", "落ち着いたローキー照明"],
+  },
+];
+
+export const palettes = {
+  standard: [
+    ["ホワイト", "#f7f7f2"], ["アイボリー", "#f2e8cf"], ["ベージュ", "#cdbb9f"],
+    ["ライトグレー", "#b8bcc2"], ["チャコールグレー", "#44474d"], ["ブラック", "#191a1d"],
+    ["ネイビー", "#1f3154"], ["ブルー", "#3a70a8"], ["サックスブルー", "#9fc7dc"],
+    ["グリーン", "#396b52"], ["オリーブ", "#6d7045"], ["ブラウン", "#714f3b"],
+    ["キャメル", "#b47b45"], ["ボルドー", "#742f42"], ["レッド", "#b8383c"],
+    ["ピンク", "#d89aab"], ["ラベンダー", "#a99bc8"], ["イエロー", "#d8b33f"],
+  ],
+  hair: [
+    ["ブラック", "#171515"], ["ナチュラルブラック", "#292423"], ["ダークブラウン", "#49352d"],
+    ["ブラウン", "#714f3b"], ["ライトブラウン", "#9a7152"], ["アッシュブラウン", "#776b65"],
+  ],
+  eyes: [
+    ["ダークブラウン", "#3b281f"], ["ブラウン", "#654434"], ["ライトブラウン", "#8a654b"],
+    ["ヘーゼル", "#887247"], ["グレー", "#70757a"],
+  ],
+};
+
+export const defaults = {
+  beauty: "美人",
+  body: "モデル体型",
+  bust: "バストがとても豊か",
+  topType: "長袖ボタンアップシャツ",
+  topColor: "ホワイト",
+  bottomType: "スラックス",
+  bottomColor: "チャコールグレー",
+  baseColor: "ホワイト",
+  hairColor: "ダークブラウン",
+  hairstyle: "流し前髪のボブ",
+  eyeColor: "ブラウン",
+  expression: "",
+  pose: "",
+  framing: "",
+  background: "",
+  lighting: "",
+};
+
+export function paletteFor(field) {
+  return palettes[field.palette || "standard"];
+}
+
+export function generatePrompt(values) {
+  const lines = [...fixedLines];
+  for (const field of fields) {
+    if (field.type === "color" && (field.id === "topColor" || field.id === "bottomColor")) continue;
+    const value = values[field.id];
+    if (!value) continue;
+    if (field.colorField) {
+      lines.push(`${field.prefix}${values[field.colorField]}の${value}`);
+    } else {
+      lines.push(field.prefix ? `${field.prefix}${value}` : value);
+    }
+  }
+  return lines.join("\n");
+}

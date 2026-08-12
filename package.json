@@ -1,0 +1,11 @@
+{
+  "name": "7days-person-image-prompt-pwa",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "serve": "npx --yes serve@14.2.4 . -l 4173"
+  },
+  "engines": { "node": ">=20" }
+}
