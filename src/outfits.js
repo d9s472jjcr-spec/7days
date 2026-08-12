@@ -14,8 +14,8 @@ export const outfitStructureOptions = [
 
 export const outfitDecorationOptions = [
   "無し",
-  "内容は容姿の印象に合わせておまかせ、装飾量は控えめ",
-  "内容は容姿の印象に合わせておまかせ、装飾量は華美",
+  "内容は衣装に合わせておまかせ、装飾量は控えめ",
+  "内容は衣装に合わせておまかせ、装飾量は華美",
 ];
 
 export const outfitCatalogs = {
