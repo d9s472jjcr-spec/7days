@@ -21,6 +21,8 @@ iPhone実機確認時は、同一Wi-Fi内のPCで `npm run serve:lan` を実行�
 
 公開版はGitHub Pagesから配信します。実機Safari確認はChromiumのモバイル表示確認とは別に実施します。
 
+公開URL: https://d9s472jjcr-spec.github.io/7days/
+
 ## 非公開情報の扱い
 
 画像生成カスタムGPTのInstructionsやKnowledge本文は、この公開リポジトリへ保存しません。変更履歴にはバージョン、ハッシュ、目的、要約だけを記録します。
