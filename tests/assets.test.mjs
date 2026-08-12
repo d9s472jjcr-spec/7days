@@ -11,12 +11,19 @@ test("PWAの主要ファイルが存在する", async () => {
   }
 });
 
-test("旧保存キーを削除し保存形式v2を使用する", async () => {
+test("旧保存キーを削除し保存形式v3を使用する", async () => {
   const app = await readFile(resolve(root, "src/app.js"), "utf8");
-  assert.match(app, /7days:last-values:v2/);
-  assert.match(app, /7days:presets:v2/);
+  assert.match(app, /7days:last-values:v3/);
+  assert.match(app, /7days:presets:v3/);
   assert.match(app, /removeItem\("7days:last-values:v1"\)/);
   assert.match(app, /removeItem\("7days:presets:v1"\)/);
+  assert.match(app, /removeItem\("7days:last-values:v2"\)/);
+  assert.match(app, /removeItem\("7days:presets:v2"\)/);
+});
+
+test("Service Workerは更新済みキャッシュ名を使用する", async () => {
+  const serviceWorker = await readFile(resolve(root, "sw.js"), "utf8");
+  assert.match(serviceWorker, /const CACHE = "7days-v5"/);
 });
 
 test("プリセット読込処理はページを再読み込みしない", async () => {

@@ -1,10 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  bangsOptions,
+  commonPalette,
   defaults,
   fields,
   fixedLines,
   generatePrompt,
+  hairstyleOptions,
   normalizeOutfitState,
   outfitFields,
   paletteFor,
@@ -21,9 +24,10 @@ const noOutfitBaseline = `ユーザー指示
 健康的な女性らしさのある標準体型
 豊かなバスト（89cm相当）
 標準的なヒップ（85cm相当）
-髪色はダークブラウン
-髪型は流し前髪のボブ
-瞳の色はブラウン`;
+髪色はナチュラルブラウン
+髪型は顎丈のナチュラルボブ
+前髪は流し前髪
+瞳の色はナチュラルブラウン`;
 
 const stageSeparate = {
   ...defaults,
@@ -33,7 +37,7 @@ const stageSeparate = {
   bottomDesign: "stage_bottom_01",
 };
 
-test("初期状態は衣装未選択の11行と完全一致する", () => {
+test("初期状態は衣装未選択の12行と完全一致する", () => {
   assert.equal(generatePrompt(defaults), noOutfitBaseline);
 });
 
@@ -105,8 +109,47 @@ test("任意の撮影設定は選択時だけ定められた順で追記する",
 test("全固定フィールドの初期値は有効な選択肢に含まれる", () => {
   for (const field of fields.filter((item) => !item.optional)) {
     if (field.type === "color") assert.ok(paletteFor(field).some(([name]) => name === defaults[field.id]), field.id);
-    else assert.ok(field.options.includes(defaults[field.id]), field.id);
+    else assert.ok(field.options.some((option) => (typeof option === "string" ? option : option.value) === defaults[field.id]), field.id);
   }
+});
+
+test("5つの色項目は同じ順序の共通55色を使う", () => {
+  const expectedNames = [
+    "ブラック", "ナチュラルブラック", "ソフトブラック", "ブルーブラック", "アッシュブラック", "チャコールブラック",
+    "ブラウン", "ナチュラルブラウン", "ココアブラウン", "マロンブラウン", "ダークブラウン", "ベージュ", "キャメル", "モカベージュ", "ヌーディベージュ", "アッシュブラウン", "アッシュベージュ", "グレージュ",
+    "ライトグレー", "チャコールグレー", "ピンク", "ショコラピンク", "ラベンダー", "ラベンダーブラウン", "ウォルナットブラウン", "ウォームブラウン",
+    "グリーン", "オリーブ", "オリーブブラウン", "ホワイト", "アイボリー", "イエロー", "ライトブロンド", "ハニーブロンド", "プラチナブロンド", "アッシュブロンド", "ピンクブロンド", "ミルクティーベージュ", "シルバーアッシュ", "ホワイトブロンド", "オリーブグレージュ", "カーキアッシュ",
+    "レッド", "チェリーピンク", "ワインレッド", "アプリコットオレンジ", "ラベンダーアッシュ", "ハニーピンク", "ブルー", "サックスブルー", "ネイビーブルー", "インディゴブルー", "ターコイズブルー", "シアンブルー", "スカイブルー",
+  ];
+  assert.equal(commonPalette.length, 55);
+  assert.equal(new Set(commonPalette.map(([name]) => name)).size, 55);
+  assert.deepEqual(commonPalette.map(([name]) => name), expectedNames);
+  assert.ok(commonPalette.every(([, hex]) => /^#[0-9A-F]{6}$/.test(hex)));
+  assert.deepEqual(commonPalette[0], ["ブラック", "#191A1D"]);
+  assert.deepEqual(commonPalette[7], ["ナチュラルブラウン", "#5A3F34"]);
+  assert.deepEqual(commonPalette[19], ["チャコールグレー", "#4A484A"]);
+  assert.deepEqual(commonPalette[29], ["ホワイト", "#F7F7F2"]);
+  assert.deepEqual(commonPalette[54], ["スカイブルー", "#78B2CA"]);
+
+  const separateColors = outfitFields({ ...defaults, outfitType: "stage", outfitStructure: "separate" }).filter(({ type }) => type === "color");
+  const onepieceColors = outfitFields({ ...defaults, outfitType: "stage", outfitStructure: "onepiece" }).filter(({ type }) => type === "color");
+  const hairAndEyeColors = fields.filter(({ type }) => type === "color");
+  const colorFields = [...separateColors, ...onepieceColors, ...hairAndEyeColors];
+  assert.deepEqual(colorFields.map(({ id }) => id), ["topColor", "bottomColor", "outfitColor", "hairColor", "eyeColor"]);
+  colorFields.forEach((field) => assert.strictEqual(paletteFor(field), commonPalette));
+});
+
+test("髪型17種類は短いUI名と正式な出力語句を持つ", () => {
+  assert.equal(hairstyleOptions.length, 17);
+  assert.deepEqual(hairstyleOptions[3], { value: "顎丈のナチュラルボブ", label: "ナチュラルボブ" });
+  assert.ok(hairstyleOptions.every(({ value, label }) => value && label));
+  assert.ok(hairstyleOptions.every(({ value, label }) => !/セミロング|ベリーロング/.test(`${value}${label}`)));
+});
+
+test("前髪は確定した9種類だけを持つ", () => {
+  assert.deepEqual(bangsOptions, ["センターパート", "サイドパート", "かきあげ前髪", "流し前髪", "斜め前髪", "サイドバング", "ワイドバング", "ラウンドバング", "メカクレ"]);
+  assert.ok(!bangsOptions.includes("前髪なし"));
+  assert.ok(!bangsOptions.includes("ぱっつん前髪"));
 });
 
 test("固定条件は成人・架空・日本人女性・フォトリアルを明記する", () => {
@@ -115,7 +158,7 @@ test("固定条件は成人・架空・日本人女性・フォトリアルを�
 
 test("選択肢は空文字の任意項目を除き重複しない", () => {
   for (const field of fields) {
-    const values = field.type === "color" ? paletteFor(field).map(([name]) => name) : field.options.filter(Boolean);
+    const values = field.type === "color" ? paletteFor(field).map(([name]) => name) : field.options.map((option) => typeof option === "string" ? option : option.value).filter(Boolean);
     assert.equal(new Set(values).size, values.length, field.id);
   }
 });
