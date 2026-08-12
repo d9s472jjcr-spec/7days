@@ -1,14 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { defaults, fields, fixedLines, generatePrompt, paletteFor } from "../src/catalog.js";
+import { defaults, fields, fixedLines, generatePrompt, paletteFor, presetMessage } from "../src/catalog.js";
 
 const baseline = `ユーザー指示
 画像の新規生成
 フォトリアル
 架空の20代の成人日本人女性
-美人
-モデル体型
-バストがとても豊か
+クール系美人
+健康的な女性らしさのある標準体型
+豊かなバスト（89cm相当）
+標準的なヒップ（85cm相当）
 トップスはホワイトの長袖ボタンアップシャツ
 ボトムスはチャコールグレーのスラックス
 衣装の基調カラーはホワイト
@@ -63,4 +64,22 @@ test("選択肢は空文字の任意項目を除き重複しない", () => {
     const values = field.type === "color" ? paletteFor(field).map(([name]) => name) : field.options.filter(Boolean);
     assert.equal(new Set(values).size, values.length, field.id);
   }
+});
+
+test("ヒップは画面と指示文でバストの直後に配置される", () => {
+  const bustIndex = fields.findIndex(({ id }) => id === "bust");
+  assert.equal(fields[bustIndex + 1].id, "hip");
+  assert.match(generatePrompt(defaults), /豊かなバスト（89cm相当）\n標準的なヒップ（85cm相当）/);
+});
+
+test("旧プリセットにないヒップ値は初期値で補完できる", () => {
+  const oldPreset = { beauty: "可愛い系美人" };
+  const restored = { ...defaults, ...oldPreset };
+  assert.equal(restored.hip, "標準的なヒップ（85cm相当）");
+});
+
+test("プリセット操作の完了通知に対象名を含める", () => {
+  assert.equal(presetMessage("save", "白シャツ"), "白シャツを端末に登録しました");
+  assert.equal(presetMessage("load", "白シャツ"), "白シャツを呼び出しました");
+  assert.equal(presetMessage("delete", "白シャツ"), "白シャツを端末から削除しました");
 });

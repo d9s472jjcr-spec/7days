@@ -1,7 +1,9 @@
-import { defaults, fields, generatePrompt, paletteFor } from "./catalog.js";
+import { defaults, fields, generatePrompt, paletteFor, presetMessage } from "./catalog.js";
 
 const STORAGE_KEY = "7days:last-values:v1";
 const PRESETS_KEY = "7days:presets:v1";
+const PENDING_TOAST_KEY = "7days:pending-toast:v1";
+const PENDING_PRESET_KEY = "7days:pending-preset:v1";
 const state = loadJson(STORAGE_KEY, defaults);
 const form = document.querySelector("#prompt-form");
 const output = document.querySelector("#prompt-output");
@@ -165,27 +167,39 @@ savePresetButton.addEventListener("click", () => {
   localStorage.setItem(PRESETS_KEY, JSON.stringify(all));
   presetName.value = "";
   refreshPresets(name);
-  showToast("プリセットを保存しました");
+  showToast(presetMessage("save", name));
 });
 presetSelect.addEventListener("change", () => {
-  const selected = presets()[presetSelect.value];
+  const name = presetSelect.value;
+  const selected = presets()[name];
   if (!selected) return;
   Object.assign(state, defaults, selected);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  sessionStorage.setItem(PENDING_TOAST_KEY, presetMessage("load", name));
+  sessionStorage.setItem(PENDING_PRESET_KEY, name);
   location.reload();
 });
 deletePresetButton.addEventListener("click", () => {
   if (!presetSelect.value) return showToast("削除するプリセットを選択してください");
+  const name = presetSelect.value;
   const all = presets();
-  delete all[presetSelect.value];
+  delete all[name];
   localStorage.setItem(PRESETS_KEY, JSON.stringify(all));
   refreshPresets();
-  showToast("プリセットを削除しました");
+  showToast(presetMessage("delete", name));
 });
 
 renderForm();
 renderOutput();
-refreshPresets();
+const pendingPreset = sessionStorage.getItem(PENDING_PRESET_KEY) || "";
+sessionStorage.removeItem(PENDING_PRESET_KEY);
+refreshPresets(pendingPreset);
+
+const pendingToast = sessionStorage.getItem(PENDING_TOAST_KEY);
+if (pendingToast) {
+  sessionStorage.removeItem(PENDING_TOAST_KEY);
+  showToast(pendingToast);
+}
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));
