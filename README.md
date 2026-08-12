@@ -17,6 +17,8 @@ npm test
 npm run serve
 ```
 
+iPhone実機確認時は、同一Wi-Fi内のPCで `npm run serve:lan` を実行し、PCのLAN IPの4175番へアクセスします。
+
 公開版はGitHub Pagesから配信します。実機Safari確認はChromiumのモバイル表示確認とは別に実施します。
 
 ## 非公開情報の扱い

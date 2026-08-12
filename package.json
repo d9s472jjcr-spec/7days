@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "serve": "npx --yes serve@14.2.4 . -l 4173"
+    "serve": "node scripts/serve-local.mjs 4175 127.0.0.1",
+    "serve:lan": "node scripts/serve-local.mjs 4175 0.0.0.0"
   },
   "engines": { "node": ">=20" }
 }
