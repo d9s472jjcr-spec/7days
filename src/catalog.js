@@ -13,11 +13,11 @@ export const fixedLines = [
   "画像の新規生成",
   "フォトリアル",
   "架空の20代の成人日本人女性",
+  "美人",
+  "脚の長いモデル体型",
 ];
 
 export const personFields = [
-  { id: "beauty", label: "容姿", section: "人物", options: ["可愛い系美人", "清楚系美人", "クール系美人", "知的系美人", "柔和系美人", "薄幸系美人", "妖艶系美人", "中性的美人"] },
-  { id: "body", label: "体型", section: "人物", options: ["細身で脚の長いモデル体型", "健康的な女性らしさのある標準体型", "メリハリのある曲線美を持つグラマラス体型", "健康的ながら引き締まったスポーティ体型"] },
   { id: "bust", label: "バスト", section: "人物", options: ["控えめなバスト（79cm相当）", "標準的なバスト（84cm相当）", "豊かなバスト（89cm相当）", "とても豊かなバスト（94cm相当）"] },
   { id: "hip", label: "ヒップ", section: "人物", options: ["控えめなヒップ（80cm相当）", "標準的なヒップ（85cm相当）", "豊かなヒップ（90cm相当）", "とても豊かなヒップ（95cm相当）"] },
 ];
@@ -52,11 +52,16 @@ export const hairFields = [
 ];
 
 export const shootingFields = [
-  { id: "expression", label: "表情（任意）", section: "撮影設定", optional: true, prefix: "表情は", options: ["", "自然な微笑み", "穏やかな微笑み", "落ち着いたニュートラルな表情", "自信のある表情", "やさしい表情", "凛とした表情"] },
-  { id: "pose", label: "ポーズ（任意）", section: "撮影設定", optional: true, prefix: "ポーズは", options: ["", "自然な直立姿勢", "正面を向いた直立姿勢", "体をわずかに斜めにした立ち姿", "片手を腰に添えた立ち姿", "腕を自然に下ろした立ち姿", "椅子に浅く腰掛けた姿勢"] },
-  { id: "framing", label: "構図（任意）", section: "撮影設定", optional: true, prefix: "構図は", options: ["", "全身が入る縦位置", "頭から膝までが入る縦位置", "ウエストアップ", "バストアップ", "目線の高さからの正面撮影", "わずかに斜め前からの撮影"] },
-  { id: "background", label: "背景（任意）", section: "撮影設定", optional: true, prefix: "背景は", options: ["", "無地のライトグレーのスタジオ背景", "無地のホワイトのスタジオ背景", "落ち着いた室内", "明るいオフィス", "自然光の入る窓辺", "背景を自然にぼかした屋外"] },
-  { id: "lighting", label: "照明（任意）", section: "撮影設定", optional: true, prefix: "照明は", options: ["", "柔らかなスタジオ照明", "窓から入る柔らかな自然光", "均一な拡散光", "輪郭を自然に見せる斜め前方からの光", "明るく清潔感のあるハイキー照明", "落ち着いたローキー照明"] },
+  { id: "expression", label: "表情", section: "撮影設定", options: [
+    { value: "表情は真剣。口元を自然に閉じ、落ち着いた目元にする", label: "真剣" },
+    { value: "表情は控えめな喜び。口角をわずかに上げ、目元を柔らかくする", label: "喜び" },
+    { value: "表情は控えめな怒り。口をわずかに結び、視線を少し鋭くし、眉の内側をわずかに下げる", label: "怒り" },
+    { value: "表情は控えめな悲しみ。口角と目元をわずかに下げ、眉の内側をわずかに上げる", label: "悲しみ" },
+  ] },
+  { id: "pose", label: "ポーズ（任意）", section: "撮影設定", optional: true, prefix: "ポーズは", options: ["", "体をわずかに斜めにした立ち姿", "片手を腰に添えた立ち姿", "椅子に浅く腰掛けた姿勢"] },
+  { id: "framing", label: "構図（任意）", section: "撮影設定", optional: true, prefix: "構図は", options: ["", "頭から膝までが入る縦位置", "ウエストアップ", "バストアップ", "わずかに斜め前からの撮影"] },
+  { id: "background", label: "背景（任意）", section: "撮影設定", optional: true, prefix: "背景は", options: ["", "無地のライトグレーのスタジオ背景", "落ち着いた室内", "明るいオフィス", "自然光の入る窓辺", "背景を自然にぼかした屋外"] },
+  { id: "lighting", label: "照明（任意）", section: "撮影設定", optional: true, prefix: "照明は", options: ["", "窓から入る柔らかな自然光", "明るく清潔感のあるハイキー照明", "落ち着いたローキー照明"] },
 ];
 
 export const fields = [...personFields, ...hairFields, ...shootingFields];
@@ -74,8 +79,6 @@ export const commonPalette = [
 ];
 
 export const defaults = {
-  beauty: "クール系美人",
-  body: "健康的な女性らしさのある標準体型",
   bust: "豊かなバスト（89cm相当）",
   hip: "標準的なヒップ（85cm相当）",
   outfitType: "",
@@ -91,7 +94,7 @@ export const defaults = {
   hairstyle: "顎丈のナチュラルボブ",
   bangs: "流し前髪",
   eyeColor: "ナチュラルブラウン",
-  expression: "",
+  expression: "表情は真剣。口元を自然に閉じ、落ち着いた目元にする",
   pose: "",
   framing: "",
   background: "",

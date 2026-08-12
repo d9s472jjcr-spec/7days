@@ -11,8 +11,10 @@ import {
   normalizeOutfitState,
   outfitFields,
   paletteFor,
+  personFields,
   presetMessage,
   resetOutfitSelection,
+  shootingFields,
 } from "../src/catalog.js";
 import { outfitCatalogs } from "../src/outfits.js";
 
@@ -20,14 +22,15 @@ const noOutfitBaseline = `ユーザー指示
 画像の新規生成
 フォトリアル
 架空の20代の成人日本人女性
-クール系美人
-健康的な女性らしさのある標準体型
+美人
+脚の長いモデル体型
 豊かなバスト（89cm相当）
 標準的なヒップ（85cm相当）
 髪色はナチュラルブラウン
 髪型は顎丈のナチュラルボブ
 前髪は流し前髪
-瞳の色はナチュラルブラウン`;
+瞳の色はナチュラルブラウン
+表情は真剣。口元を自然に閉じ、落ち着いた目元にする`;
 
 const stageSeparate = {
   ...defaults,
@@ -37,7 +40,7 @@ const stageSeparate = {
   bottomDesign: "stage_bottom_01",
 };
 
-test("初期状態は衣装未選択の12行と完全一致する", () => {
+test("初期状態は衣装未選択の13行と完全一致する", () => {
   assert.equal(generatePrompt(defaults), noOutfitBaseline);
 });
 
@@ -101,9 +104,41 @@ test("無効な保存値は現行カタログの1番へ補正する", () => {
   assert.equal(restored.bottomDesign, "stage_bottom_01");
 });
 
-test("任意の撮影設定は選択時だけ定められた順で追記する", () => {
-  const prompt = generatePrompt({ ...defaults, expression: "自然な微笑み", pose: "自然な直立姿勢", framing: "全身が入る縦位置", background: "無地のホワイトのスタジオ背景", lighting: "柔らかなスタジオ照明" });
-  assert.ok(prompt.endsWith(["表情は自然な微笑み", "ポーズは自然な直立姿勢", "構図は全身が入る縦位置", "背景は無地のホワイトのスタジオ背景", "照明は柔らかなスタジオ照明"].join("\n")));
+test("表情と任意の撮影設定は定められた順で追記する", () => {
+  const expression = "表情は控えめな喜び。口角をわずかに上げ、目元を柔らかくする";
+  const prompt = generatePrompt({ ...defaults, expression, pose: "体をわずかに斜めにした立ち姿", framing: "頭から膝までが入る縦位置", background: "無地のライトグレーのスタジオ背景", lighting: "窓から入る柔らかな自然光" });
+  assert.ok(prompt.endsWith([expression, "ポーズは体をわずかに斜めにした立ち姿", "構図は頭から膝までが入る縦位置", "背景は無地のライトグレーのスタジオ背景", "照明は窓から入る柔らかな自然光"].join("\n")));
+});
+
+test("容姿と体型はUIから廃止し固定文として出力する", () => {
+  assert.deepEqual(personFields.map(({ id }) => id), ["bust", "hip"]);
+  assert.ok(!fields.some(({ id }) => id === "beauty" || id === "body"));
+  assert.deepEqual(fixedLines.slice(-2), ["美人", "脚の長いモデル体型"]);
+});
+
+test("表情は真剣を初期値とする確定4種類だけを持つ", () => {
+  const expression = shootingFields.find(({ id }) => id === "expression");
+  assert.equal(defaults.expression, expression.options[0].value);
+  assert.deepEqual(expression.options, [
+    { label: "真剣", value: "表情は真剣。口元を自然に閉じ、落ち着いた目元にする" },
+    { label: "喜び", value: "表情は控えめな喜び。口角をわずかに上げ、目元を柔らかくする" },
+    { label: "怒り", value: "表情は控えめな怒り。口をわずかに結び、視線を少し鋭くし、眉の内側をわずかに下げる" },
+    { label: "悲しみ", value: "表情は控えめな悲しみ。口角と目元をわずかに下げ、眉の内側をわずかに上げる" },
+  ]);
+});
+
+test("衣装選択後の指示文は上下分離18行・上下一体17行になる", () => {
+  assert.equal(generatePrompt(stageSeparate).split("\n").length, 18);
+  const stageOnepiece = normalizeOutfitState({ ...defaults, outfitType: "stage", outfitStructure: "onepiece" });
+  assert.equal(generatePrompt(stageOnepiece).split("\n").length, 17);
+});
+
+test("その他の撮影設定は差の大きい確定候補だけを持つ", () => {
+  const byId = Object.fromEntries(shootingFields.map((field) => [field.id, field]));
+  assert.deepEqual(byId.pose.options, ["", "体をわずかに斜めにした立ち姿", "片手を腰に添えた立ち姿", "椅子に浅く腰掛けた姿勢"]);
+  assert.deepEqual(byId.framing.options, ["", "頭から膝までが入る縦位置", "ウエストアップ", "バストアップ", "わずかに斜め前からの撮影"]);
+  assert.deepEqual(byId.background.options, ["", "無地のライトグレーのスタジオ背景", "落ち着いた室内", "明るいオフィス", "自然光の入る窓辺", "背景を自然にぼかした屋外"]);
+  assert.deepEqual(byId.lighting.options, ["", "窓から入る柔らかな自然光", "明るく清潔感のあるハイキー照明", "落ち着いたローキー照明"]);
 });
 
 test("全固定フィールドの初期値は有効な選択肢に含まれる", () => {
@@ -152,8 +187,8 @@ test("前髪は確定した9種類だけを持つ", () => {
   assert.ok(!bangsOptions.includes("ぱっつん前髪"));
 });
 
-test("固定条件は成人・架空・日本人女性・フォトリアルを明記する", () => {
-  assert.deepEqual(fixedLines, ["ユーザー指示", "画像の新規生成", "フォトリアル", "架空の20代の成人日本人女性"]);
+test("固定条件は成人・架空・日本人女性・フォトリアル・美人・モデル体型を明記する", () => {
+  assert.deepEqual(fixedLines, ["ユーザー指示", "画像の新規生成", "フォトリアル", "架空の20代の成人日本人女性", "美人", "脚の長いモデル体型"]);
 });
 
 test("選択肢は空文字の任意項目を除き重複しない", () => {

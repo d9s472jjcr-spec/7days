@@ -8,16 +8,18 @@ import {
   visibleFields,
 } from "./catalog.js";
 
-const STORAGE_KEY = "7days:last-values:v3";
-const PRESETS_KEY = "7days:presets:v3";
+const STORAGE_KEY = "7days:last-values:v4";
+const PRESETS_KEY = "7days:presets:v4";
 const SCHEMA_KEY = "7days:schema-version";
 
-if (localStorage.getItem(SCHEMA_KEY) !== "3") {
+if (localStorage.getItem(SCHEMA_KEY) !== "4") {
   localStorage.removeItem("7days:last-values:v1");
   localStorage.removeItem("7days:presets:v1");
   localStorage.removeItem("7days:last-values:v2");
   localStorage.removeItem("7days:presets:v2");
-  localStorage.setItem(SCHEMA_KEY, "3");
+  localStorage.removeItem("7days:last-values:v3");
+  localStorage.removeItem("7days:presets:v3");
+  localStorage.setItem(SCHEMA_KEY, "4");
 }
 
 const state = normalizeOutfitState(loadJson(STORAGE_KEY, defaults));
