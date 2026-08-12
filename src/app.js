@@ -1,10 +1,24 @@
-import { defaults, fields, generatePrompt, paletteFor, presetMessage } from "./catalog.js";
+import {
+  defaults,
+  generatePrompt,
+  normalizeOutfitState,
+  paletteFor,
+  presetMessage,
+  resetOutfitSelection,
+  visibleFields,
+} from "./catalog.js";
 
-const STORAGE_KEY = "7days:last-values:v1";
-const PRESETS_KEY = "7days:presets:v1";
-const PENDING_TOAST_KEY = "7days:pending-toast:v1";
-const PENDING_PRESET_KEY = "7days:pending-preset:v1";
-const state = loadJson(STORAGE_KEY, defaults);
+const STORAGE_KEY = "7days:last-values:v2";
+const PRESETS_KEY = "7days:presets:v2";
+const SCHEMA_KEY = "7days:schema-version";
+
+if (localStorage.getItem(SCHEMA_KEY) !== "2") {
+  localStorage.removeItem("7days:last-values:v1");
+  localStorage.removeItem("7days:presets:v1");
+  localStorage.setItem(SCHEMA_KEY, "2");
+}
+
+const state = normalizeOutfitState(loadJson(STORAGE_KEY, defaults));
 const form = document.querySelector("#prompt-form");
 const output = document.querySelector("#prompt-output");
 const copyButton = document.querySelector("#copy-button");
@@ -14,6 +28,7 @@ const presetSelect = document.querySelector("#preset-select");
 const savePresetButton = document.querySelector("#save-preset");
 const deletePresetButton = document.querySelector("#delete-preset");
 const toast = document.querySelector("#toast");
+const presetCard = document.querySelector(".preset-card");
 
 function loadJson(key, fallback) {
   try {
@@ -24,15 +39,20 @@ function loadJson(key, fallback) {
   }
 }
 
+function optionRecord(option) {
+  return typeof option === "string" ? { value: option, label: option || "指定なし" } : option;
+}
+
 function createSelect(field) {
   const select = document.createElement("select");
   select.id = field.id;
   select.name = field.id;
   select.setAttribute("aria-label", field.label);
-  field.options.forEach((value) => {
+  field.options.forEach((item) => {
+    const record = optionRecord(item);
     const option = document.createElement("option");
-    option.value = value;
-    option.textContent = value || "指定なし";
+    option.value = record.value;
+    option.textContent = record.label;
     select.append(option);
   });
   select.value = state[field.id] ?? defaults[field.id];
@@ -47,6 +67,7 @@ function createColorPicker(field) {
   button.type = "button";
   button.className = "color-trigger";
   button.id = field.id;
+  button.setAttribute("aria-label", field.label);
   button.setAttribute("aria-haspopup", "listbox");
   button.setAttribute("aria-expanded", "false");
   const panel = document.createElement("div");
@@ -69,17 +90,13 @@ function createColorPicker(field) {
     option.dataset.value = name;
     option.innerHTML = `<span class="swatch" style="--swatch:${hex}"></span><span>${name}</span>`;
     option.addEventListener("click", () => {
-      paint(name);
       updateValue(field.id, name);
-      close();
+      panel.hidden = true;
+      button.setAttribute("aria-expanded", "false");
     });
     panel.append(option);
   });
 
-  function close() {
-    panel.hidden = true;
-    button.setAttribute("aria-expanded", "false");
-  }
   button.addEventListener("click", () => {
     const opening = panel.hidden;
     document.querySelectorAll(".color-panel:not([hidden])").forEach((item) => { item.hidden = true; });
@@ -87,23 +104,31 @@ function createColorPicker(field) {
     panel.hidden = !opening;
     button.setAttribute("aria-expanded", String(opening));
   });
-  document.addEventListener("click", (event) => { if (!wrap.contains(event.target)) close(); });
   wrap.append(button, panel);
   return wrap;
 }
 
+document.addEventListener("click", (event) => {
+  if (event.target.closest(".color-picker")) return;
+  document.querySelectorAll(".color-panel:not([hidden])").forEach((item) => { item.hidden = true; });
+  document.querySelectorAll(".color-trigger[aria-expanded=true]").forEach((item) => item.setAttribute("aria-expanded", "false"));
+});
+
 function renderForm() {
+  form.replaceChildren();
   const groups = new Map();
-  fields.forEach((field) => {
+  visibleFields(state).forEach((field) => {
     if (!groups.has(field.section)) {
       const section = document.createElement("section");
       section.className = "form-section card";
+      section.dataset.section = field.section;
       section.innerHTML = `<h2>${field.section}</h2>`;
       groups.set(field.section, section);
       form.append(section);
     }
     const row = document.createElement("div");
     row.className = "field-row";
+    row.dataset.field = field.id;
     const label = document.createElement("label");
     label.htmlFor = field.id;
     label.textContent = field.label;
@@ -112,15 +137,31 @@ function renderForm() {
   });
 }
 
-function updateValue(id, value) {
-  state[id] = value;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  renderOutput();
-}
-
 function renderOutput() {
   output.value = generatePrompt(state);
   document.querySelector("#line-count").textContent = `${output.value.split("\n").length}行`;
+}
+
+function renderState(anchor = null) {
+  const previousTop = anchor?.getBoundingClientRect().top;
+  renderForm();
+  renderOutput();
+  if (anchor && Number.isFinite(previousTop)) {
+    window.scrollBy(0, anchor.getBoundingClientRect().top - previousTop);
+  }
+}
+
+function updateValue(id, value) {
+  state[id] = value;
+  if (id === "outfitType") {
+    if (!value) state.outfitStructure = "";
+    if (state.outfitStructure) resetOutfitSelection(state);
+    else normalizeOutfitState(state);
+  } else if (id === "outfitStructure") {
+    resetOutfitSelection(state);
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  renderState();
 }
 
 function showToast(message) {
@@ -142,6 +183,7 @@ async function copyPrompt() {
 }
 
 function presets() { return loadJson(PRESETS_KEY, {}); }
+
 function refreshPresets(selected = "") {
   presetSelect.innerHTML = '<option value="">プリセットを選択</option>';
   Object.keys(presets()).sort((a, b) => a.localeCompare(b, "ja")).forEach((name) => {
@@ -155,8 +197,7 @@ function refreshPresets(selected = "") {
 
 copyButton.addEventListener("click", copyPrompt);
 resetButton.addEventListener("click", () => {
-  Object.assign(state, defaults);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
   location.reload();
 });
 savePresetButton.addEventListener("click", () => {
@@ -174,10 +215,11 @@ presetSelect.addEventListener("change", () => {
   const selected = presets()[name];
   if (!selected) return;
   Object.assign(state, defaults, selected);
+  normalizeOutfitState(state);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  sessionStorage.setItem(PENDING_TOAST_KEY, presetMessage("load", name));
-  sessionStorage.setItem(PENDING_PRESET_KEY, name);
-  location.reload();
+  renderState(presetCard);
+  refreshPresets(name);
+  showToast(presetMessage("load", name));
 });
 deletePresetButton.addEventListener("click", () => {
   if (!presetSelect.value) return showToast("削除するプリセットを選択してください");
@@ -189,17 +231,8 @@ deletePresetButton.addEventListener("click", () => {
   showToast(presetMessage("delete", name));
 });
 
-renderForm();
-renderOutput();
-const pendingPreset = sessionStorage.getItem(PENDING_PRESET_KEY) || "";
-sessionStorage.removeItem(PENDING_PRESET_KEY);
-refreshPresets(pendingPreset);
-
-const pendingToast = sessionStorage.getItem(PENDING_TOAST_KEY);
-if (pendingToast) {
-  sessionStorage.removeItem(PENDING_TOAST_KEY);
-  showToast(pendingToast);
-}
+renderState();
+refreshPresets();
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

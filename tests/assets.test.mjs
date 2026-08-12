@@ -6,9 +6,24 @@ import { resolve } from "node:path";
 const root = resolve(import.meta.dirname, "..");
 
 test("PWAの主要ファイルが存在する", async () => {
-  for (const path of ["index.html", "styles.css", "manifest.webmanifest", "sw.js", "icons/icon-192.png", "icons/icon-512.png"]) {
+  for (const path of ["index.html", "styles.css", "src/app.js", "src/catalog.js", "src/outfits.js", "manifest.webmanifest", "sw.js", "icons/icon-192.png", "icons/icon-512.png"]) {
     assert.ok((await stat(resolve(root, path))).size > 0, path);
   }
+});
+
+test("旧保存キーを削除し保存形式v2を使用する", async () => {
+  const app = await readFile(resolve(root, "src/app.js"), "utf8");
+  assert.match(app, /7days:last-values:v2/);
+  assert.match(app, /7days:presets:v2/);
+  assert.match(app, /removeItem\("7days:last-values:v1"\)/);
+  assert.match(app, /removeItem\("7days:presets:v1"\)/);
+});
+
+test("プリセット読込処理はページを再読み込みしない", async () => {
+  const app = await readFile(resolve(root, "src/app.js"), "utf8");
+  const loadHandler = app.slice(app.indexOf('presetSelect.addEventListener("change"'), app.indexOf('deletePresetButton.addEventListener'));
+  assert.doesNotMatch(loadHandler, /location\.reload/);
+  assert.match(loadHandler, /renderState\(presetCard\)/);
 });
 
 test("manifestはインストール可能な基本情報を持つ", async () => {
