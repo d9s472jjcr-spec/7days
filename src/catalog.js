@@ -89,7 +89,7 @@ export const defaults = {
   bottomColor: "チャコールグレー",
   outfitDesign: "",
   outfitColor: "ホワイト",
-  outfitDecoration: "内容は容姿の印象に合わせておまかせ、装飾量は控えめ",
+  outfitDecoration: "内容は衣装に合わせておまかせ、装飾量は控えめ",
   hairColor: "ナチュラルブラウン",
   hairstyle: "顎丈のナチュラルボブ",
   bangs: "流し前髪",

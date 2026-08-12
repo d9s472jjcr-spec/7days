@@ -25,7 +25,7 @@ test("旧保存キーを削除し保存形式v4を使用する", async () => {
 
 test("Service Workerは更新済みキャッシュ名を使用する", async () => {
   const serviceWorker = await readFile(resolve(root, "sw.js"), "utf8");
-  assert.match(serviceWorker, /const CACHE = "7days-v6"/);
+  assert.match(serviceWorker, /const CACHE = "7days-v7"/);
 });
 
 test("プリセット読込処理はページを再読み込みしない", async () => {
