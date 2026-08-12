@@ -1,5 +1,5 @@
-const CACHE = "7days-v3";
-const ASSETS = ["./", "./index.html", "./styles.css", "./src/app.js", "./src/catalog.js", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
+const CACHE = "7days-v4";
+const ASSETS = ["./", "./index.html", "./styles.css", "./src/app.js", "./src/catalog.js", "./src/outfits.js", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
