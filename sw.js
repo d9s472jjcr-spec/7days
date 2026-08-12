@@ -1,4 +1,4 @@
-const CACHE = "7days-v1";
+const CACHE = "7days-v3";
 const ASSETS = ["./", "./index.html", "./styles.css", "./src/app.js", "./src/catalog.js", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {

@@ -10,19 +10,25 @@ export const fields = [
     id: "beauty",
     label: "容姿",
     section: "人物",
-    options: ["美人", "端正な顔立ち", "上品な美人", "親しみやすい美人", "クールな美人"],
+    options: ["可愛い系美人", "清楚系美人", "クール系美人", "知的系美人", "柔和系美人", "薄幸系美人", "妖艶系美人", "中性的美人"],
   },
   {
     id: "body",
     label: "体型",
     section: "人物",
-    options: ["モデル体型", "スレンダー体型", "健康的で均整の取れた体型", "グラマラスな体型", "アスリート体型"],
+    options: ["細身で脚の長いモデル体型", "健康的な女性らしさのある標準体型", "メリハリのある曲線美を持つグラマラス体型", "健康的ながら引き締まったスポーティ体型"],
   },
   {
     id: "bust",
     label: "バスト",
     section: "人物",
-    options: ["バストがとても豊か", "バストが豊か", "標準的なバスト", "控えめなバスト"],
+    options: ["控えめなバスト（79cm相当）", "標準的なバスト（84cm相当）", "豊かなバスト（89cm相当）", "とても豊かなバスト（94cm相当）"],
+  },
+  {
+    id: "hip",
+    label: "ヒップ",
+    section: "人物",
+    options: ["控えめなヒップ（80cm相当）", "標準的なヒップ（85cm相当）", "豊かなヒップ（90cm相当）", "とても豊かなヒップ（95cm相当）"],
   },
   {
     id: "topType",
@@ -144,9 +150,10 @@ export const palettes = {
 };
 
 export const defaults = {
-  beauty: "美人",
-  body: "モデル体型",
-  bust: "バストがとても豊か",
+  beauty: "クール系美人",
+  body: "健康的な女性らしさのある標準体型",
+  bust: "豊かなバスト（89cm相当）",
+  hip: "標準的なヒップ（85cm相当）",
   topType: "長袖ボタンアップシャツ",
   topColor: "ホワイト",
   bottomType: "スラックス",
@@ -179,4 +186,13 @@ export function generatePrompt(values) {
     }
   }
   return lines.join("\n");
+}
+
+export function presetMessage(action, name) {
+  const messages = {
+    save: `${name}を端末に登録しました`,
+    load: `${name}を呼び出しました`,
+    delete: `${name}を端末から削除しました`,
+  };
+  return messages[action] || "";
 }

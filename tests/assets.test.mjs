@@ -33,3 +33,9 @@ test("iPhone向けviewportとsafe areaを備える", async () => {
   assert.match(css, /font-size:\s*16px/);
   assert.match(css, /min-height:\s*44px/);
 });
+
+test("ヘッダーは製品名のみで固定条件の注意書きを表示しない", async () => {
+  const html = await readFile(resolve(root, "index.html"), "utf8");
+  assert.match(html, /<header class="hero">\s*<h1>神は7日で世界を作った<\/h1>\s*<\/header>/);
+  assert.doesNotMatch(html, /PERSON IMAGE PROMPT BUILDER|選ぶだけで|固定条件|画像の新規生成・フォトリアル/);
+});
