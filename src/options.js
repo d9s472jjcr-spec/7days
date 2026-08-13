@@ -8,8 +8,9 @@ import {
   hairFields,
   hairstyleOptions,
   personFields,
+  promptLineForShooting,
   shootingFields,
-} from "./catalog.js?v=6.0.0";
+} from "./catalog.js?v=6.0.1";
 import {
   outfitCatalogs,
   outfitDecorationOptions,
@@ -17,7 +18,7 @@ import {
   outfitTypeOptions,
   outerwearOptions,
   shoeOptions,
-} from "./outfits.js?v=6.0.0";
+} from "./outfits.js?v=6.0.1";
 
 const sectionsRoot = document.querySelector("#catalog-sections");
 const summaryRoot = document.querySelector("#catalog-summary");
@@ -57,7 +58,11 @@ const sections = [
     { label: "前髪", note: `初期値：${defaults.bangs}`, options: plainOptions(bangsOptions, defaults.bangs) },
     { label: "髪色・瞳の色", note: "共通55色を参照", options: [option("共通55色", "髪色・瞳の色は同じカラーカタログから選択")] },
   ] },
-  { title: "撮影設定", fields: shootingFields.map((field) => ({ label: field.label, note: `初期値：${field.options.find((item) => (item.value ?? item) === defaults[field.id])?.label ?? defaults[field.id]}`, options: plainOptions(field.options, defaults[field.id]) })) },
+  { title: "撮影設定", fields: shootingFields.map((field) => ({
+    label: field.label,
+    note: `初期値：${field.options.find((item) => (item.value ?? item) === defaults[field.id])?.label ?? defaults[field.id]}`,
+    options: field.options.map((item) => option(item.label, promptLineForShooting(field.id, item.value), { isDefault: item.value === defaults[field.id] })),
+  })) },
 ];
 
 function optionItem(item, type) {

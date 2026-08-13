@@ -8,20 +8,20 @@ import {
   outfitTypeOptions,
   outerwearOptions,
   shoeOptions,
-} from "./outfits.js?v=6.0.0";
+} from "./outfits.js?v=6.0.1";
 
 export const fixedLines = [
-  "この入力は、画像の新規生成を指示するものとする。",
-  "生成する画像は、フォトリアル画像とする。",
+  "画像を新規生成する。",
+  "フォトリアルとする。",
   "被写体は、架空の20代の成人日本人女性1人とする。",
-  "人物の容姿は、美人とする。",
-  "人物の体型は、脚の長いモデル体型とする。",
+  "容姿は、美人とする。",
+  "体型は、脚の長いモデル体型とする。",
 ];
 
-export const contactShadowLine = "人物の足元には、ごく薄い自然な接地影を入れる。";
+export const contactShadowLine = "全身構図では、足元にごく薄い自然な接地影を入れる。";
 export const fixedClosingLines = [
-  "画像の縦横比は、縦長の9:16とする。",
-  "画像には、文字、ロゴ、透かし、余分な人物および不要な小物を入れない。",
+  "縦横比は、縦長の9:16とする。",
+  "文字、ロゴ、透かし、余分な人物、不要な小物は入れない。",
 ];
 
 export const personFields = [
@@ -239,43 +239,65 @@ export function normalizeOutfitState(values) {
 
 export function generatePrompt(values) {
   const lines = [...fixedLines];
-  lines.push(`人物のバストは、${values.bust}とする。`);
-  lines.push(`人物のヒップは、${values.hip}とする。`);
+  lines.push(`バストは、${values.bust}とする。`);
+  lines.push(`ヒップは、${values.hip}とする。`);
 
   const catalog = outfitCatalogFor(values.outfitType, values.outfitStructure);
   if (catalog) {
-    lines.push(`人物が着用する衣装のタイプは、${outfitLabel(outfitTypeOptions, values.outfitType)}とする。`);
-    lines.push(`衣装の構成は、${outfitLabel(outfitStructureOptions, values.outfitStructure)}とする。`);
+    lines.push(`衣装タイプは、${outfitLabel(outfitTypeOptions, values.outfitType)}とする。`);
+    lines.push(`構成は、${outfitLabel(outfitStructureOptions, values.outfitStructure)}とする。`);
     const outerwear = outfitChoice(outerwearOptions, values.outerwear);
-    if (outerwear?.value !== "none") lines.push(`人物が着用するアウターは、${values.outerwearColor}の${outerwear.fullName}とする。`);
+    if (outerwear?.value !== "none") lines.push(`アウターは、${values.outerwearColor}の${outerwear.fullName}とする。`);
     if (values.outfitStructure === "separate") {
       const top = outfitChoice(catalog.tops, values.topDesign);
       const bottom = outfitChoice(catalog.bottoms, values.bottomDesign);
-      if (top) lines.push(`人物が着用するトップスは、${values.topColor}の${top.fullName}とする。`);
-      if (bottom) lines.push(`人物が着用するボトムスは、${values.bottomColor}の${bottom.fullName}とする。`);
+      if (top) lines.push(`トップスは、${values.topColor}の${top.fullName}とする。`);
+      if (bottom) lines.push(`ボトムスは、${values.bottomColor}の${bottom.fullName}とする。`);
     } else {
       const outfit = outfitChoice(catalog.outfits, values.outfitDesign);
-      if (outfit) lines.push(`人物が着用する衣装は、${values.outfitColor}の${outfit.fullName}とする。`);
+      if (outfit) lines.push(`衣装は、${values.outfitColor}の${outfit.fullName}とする。`);
     }
-    if (values.outfitDecoration === "無し") lines.push("衣装には、装飾を付けない。");
-    else if (values.outfitDecoration?.includes("控えめ")) lines.push("衣装装飾の内容は衣装に合わせて補完し、装飾量は控えめとする。");
-    else if (values.outfitDecoration?.includes("華美")) lines.push("衣装装飾の内容は衣装に合わせて補完し、装飾量は華美とする。");
+    if (values.outfitDecoration === "無し") lines.push("装飾は付けない。");
+    else if (values.outfitDecoration?.includes("控えめ")) lines.push("装飾内容は衣装に合わせて補完し、量は控えめとする。");
+    else if (values.outfitDecoration?.includes("華美")) lines.push("装飾内容は衣装に合わせて補完し、量は華美とする。");
     const shoe = outfitChoice(shoeOptions, values.shoe);
-    if (shoe?.value === "barefoot") lines.push("人物の足元は、裸足とする。");
-    else if (shoe) lines.push(`人物が履く靴は、${values.shoeColor}の${shoe.fullName}とする。`);
+    if (shoe?.value === "barefoot") lines.push("足元は裸足とする。");
+    else if (shoe) lines.push(`靴は、${values.shoeColor}の${shoe.fullName}とする。`);
   }
 
-  lines.push(`人物の髪色は、${values.hairColor}とする。`);
-  lines.push(`人物の髪型は、${values.hairstyle}とする。`);
-  lines.push(`人物の前髪は、${values.bangs}とする。`);
-  lines.push(`人物の瞳の色は、${values.eyeColor}とする。`);
-  shootingFields.forEach((field) => lines.push(values[field.id]));
+  lines.push(`髪色は、${values.hairColor}とする。`);
+  lines.push(`髪型は、${values.hairstyle}とする。`);
+  lines.push(`前髪は、${values.bangs}とする。`);
+  lines.push(`瞳の色は、${values.eyeColor}とする。`);
+  shootingFields.forEach((field) => lines.push(promptLineForShooting(field.id, values[field.id])));
   lines.push(fixedClosingLines[0]);
   if (values.framing === shootingFields.find(({ id }) => id === "framing").options[0].value) {
     lines.push(contactShadowLine);
   }
   lines.push(fixedClosingLines[1]);
   return lines.join("\n");
+}
+
+export function promptLineForShooting(fieldId, value) {
+  if (fieldId === "expression") return value.replace(/^人物の/, "");
+  if (fieldId === "pose") {
+    if (value === "人物は椅子の前方へ浅く腰掛け、背筋を自然に伸ばし、両手を太腿の上へ置く。") {
+      return "椅子の前方へ浅く腰掛け、背筋を自然に伸ばす。腕と手は姿勢に合う自然な位置とする。";
+    }
+    return value.replace(/^人物は/, "");
+  }
+  if (fieldId === "framing") return value
+    .replaceAll("人物の頭頂", "頭頂")
+    .replace("画像には人物の頭、手、足", "頭、手、足");
+  if (fieldId === "cameraAngle") return value
+    .replaceAll("人物の目線", "被写体の目線")
+    .replace("人物の正面", "正面");
+  if (fieldId === "lighting") return value
+    .replace("人物全体", "全身")
+    .replace("人物の斜め横", "斜め横")
+    .replace("人物に自然な立体感", "自然な立体感")
+    .replace("人物の輪郭", "輪郭");
+  return value;
 }
 
 export function presetMessage(action, name) {
