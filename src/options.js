@@ -1,13 +1,15 @@
 import {
   bangsOptions,
   commonPalette,
+  contactShadowLine,
   defaults,
+  fixedClosingLines,
   fixedLines,
   hairFields,
   hairstyleOptions,
   personFields,
   shootingFields,
-} from "./catalog.js?v=5.0.0";
+} from "./catalog.js?v=6.0.0";
 import {
   outfitCatalogs,
   outfitDecorationOptions,
@@ -15,7 +17,7 @@ import {
   outfitTypeOptions,
   outerwearOptions,
   shoeOptions,
-} from "./outfits.js?v=5.0.0";
+} from "./outfits.js?v=6.0.0";
 
 const sectionsRoot = document.querySelector("#catalog-sections");
 const summaryRoot = document.querySelector("#catalog-summary");
@@ -36,7 +38,10 @@ const clothingFields = [
 ];
 
 const sections = [
-  { title: "固定出力", fields: [{ label: "固定文", note: "選択項目ではなく、すべての指示文へ常に出力", options: fixedLines.map((value) => option(value)) }] },
+  { title: "固定出力", fields: [
+    { label: "冒頭の固定文", note: "選択項目ではなく、すべての指示文へ常に出力", options: fixedLines.map((value) => option(value)) },
+    { label: "末尾の固定文", note: "接地影だけは全身構図の場合に出力", options: [...fixedClosingLines, contactShadowLine].map((value) => option(value)) },
+  ] },
   { title: "人物", fields: personFields.map((field) => ({ label: field.label, note: `初期値：${defaults[field.id]}`, options: plainOptions(field.options, defaults[field.id]) })) },
   { title: "衣装の基本設定", fields: [
     { label: "衣装タイプ", note: "初期値なし。選択後に衣装構成を表示", options: plainOptions(outfitTypeOptions.filter((item) => item.value), defaults.outfitType) },
@@ -52,7 +57,7 @@ const sections = [
     { label: "前髪", note: `初期値：${defaults.bangs}`, options: plainOptions(bangsOptions, defaults.bangs) },
     { label: "髪色・瞳の色", note: "共通55色を参照", options: [option("共通55色", "髪色・瞳の色は同じカラーカタログから選択")] },
   ] },
-  { title: "撮影設定", fields: shootingFields.map((field) => ({ label: field.label, note: field.optional ? "任意。指定なしは指示文へ出力しない" : `初期値：${field.options.find((item) => (item.value ?? item) === defaults[field.id])?.label ?? defaults[field.id]}`, options: plainOptions(field.options.filter((item) => (item.value ?? item) !== ""), defaults[field.id]) })) },
+  { title: "撮影設定", fields: shootingFields.map((field) => ({ label: field.label, note: `初期値：${field.options.find((item) => (item.value ?? item) === defaults[field.id])?.label ?? defaults[field.id]}`, options: plainOptions(field.options, defaults[field.id]) })) },
 ];
 
 function optionItem(item, type) {
