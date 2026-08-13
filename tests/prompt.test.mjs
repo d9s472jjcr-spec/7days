@@ -16,7 +16,7 @@ import {
   resetOutfitSelection,
   shootingFields,
 } from "../src/catalog.js";
-import { outfitCatalogs } from "../src/outfits.js";
+import { outfitCatalogs, outerwearOptions, shoeOptions } from "../src/outfits.js";
 
 const noOutfitBaseline = `ユーザー指示
 画像の新規生成
@@ -52,20 +52,41 @@ test("衣装構成未選択では衣装タイプと衣装構成だけを表示�
   assert.deepEqual(outfitFields({ ...defaults, outfitType: "stage" }).map(({ id }) => id), ["outfitType", "outfitStructure"]);
 });
 
-test("上下分離は分類・上下デザイン・色・装飾を自然な順序で出力する", () => {
+test("上下分離は分類・上下デザイン・色・装飾・靴を自然な順序で出力する", () => {
   const prompt = generatePrompt(stageSeparate);
-  assert.match(prompt, /衣装タイプはステージ衣装\n衣装構成は上下分離\nトップスはホワイトの長袖・スタンドカラー・ウエスト丈 ショートジャケット\nボトムスはチャコールグレーのハイウエスト・ミニ丈 フレアスカート\n衣装装飾の内容は衣装に合わせておまかせ、装飾量は控えめ/);
+  assert.match(prompt, /衣装タイプはステージ衣装\n衣装構成は上下分離\nトップスはホワイトのシャツカラーのステージシャツ\nボトムスはチャコールグレーのハイウエスト・ミニ丈 フレアスカート\n衣装装飾の内容は衣装に合わせておまかせ、装飾量は控えめ\n靴はブラックのパンプス/);
 });
 
 test("上下一体は衣装デザインと衣装色を出力する", () => {
   const values = resetOutfitSelection({ ...defaults, outfitType: "stage", outfitStructure: "onepiece" });
   const prompt = generatePrompt(values);
-  assert.match(prompt, /衣装タイプはステージ衣装\n衣装構成は上下一体\n衣装はホワイトの半袖・スクエアネック・ハイウエスト・ウエスト丈上身頃・ミニ丈 フィット＆フレアドレス/);
+  assert.match(prompt, /衣装タイプはステージ衣装\n衣装構成は上下一体\n衣装はホワイトのハイウエスト・ミニ丈 フィット＆フレアドレス/);
   assert.doesNotMatch(prompt, /トップスは|ボトムスは/);
 });
 
 test("装飾無しは省略せず明示する", () => {
   assert.match(generatePrompt({ ...stageSeparate, outfitDecoration: "無し" }), /衣装装飾は無し/);
+});
+
+test("アウターは無しなら省略し、選択時は色付きで上下より前へ出力する", () => {
+  assert.doesNotMatch(generatePrompt(stageSeparate), /アウターは/);
+  const prompt = generatePrompt({ ...stageSeparate, outerwear: "cropped_jacket", outerwearColor: "レッド" });
+  assert.match(prompt, /衣装構成は上下分離\nアウターはレッドのウエスト上丈のクロップドジャケット\nトップスは/);
+});
+
+test("裸足は靴色を出力しない", () => {
+  const prompt = generatePrompt({ ...stageSeparate, shoe: "barefoot", shoeColor: "レッド" });
+  assert.match(prompt, /足元は裸足/);
+  assert.doesNotMatch(prompt, /靴は|レッドの裸足/);
+});
+
+test("下着・ビキニ・競技用水着・コルセットを選択できる", () => {
+  assert.ok(outfitCatalogs.stage_separate.tops.some(({ label }) => label === "コルセットトップ"));
+  assert.ok(outfitCatalogs.casual_separate.tops.some(({ label }) => label === "ブラジャー"));
+  assert.ok(outfitCatalogs.casual_separate.tops.some(({ label }) => label === "ビキニトップ"));
+  assert.ok(outfitCatalogs.casual_separate.bottoms.some(({ label }) => label === "ショーツ"));
+  assert.ok(outfitCatalogs.casual_separate.bottoms.some(({ label }) => label === "ビキニボトム"));
+  assert.ok(outfitCatalogs.casual_onepiece.outfits.some(({ label }) => label === "競技用水着"));
 });
 
 test("衣装装飾のおまかせ内容は衣装を基準にする", () => {
@@ -74,23 +95,23 @@ test("衣装装飾のおまかせ内容は衣装を基準にする", () => {
   assert.ok(!prompt.includes("容姿の印象に合わせて"));
 });
 
-test("4系統は8候補ずつを持ち合計144通りになる", () => {
-  assert.equal(outfitCatalogs.stage_separate.tops.length, 8);
-  assert.equal(outfitCatalogs.stage_separate.bottoms.length, 8);
-  assert.equal(outfitCatalogs.casual_separate.tops.length, 8);
-  assert.equal(outfitCatalogs.casual_separate.bottoms.length, 8);
-  assert.equal(outfitCatalogs.stage_onepiece.outfits.length, 8);
-  assert.equal(outfitCatalogs.casual_onepiece.outfits.length, 8);
-  const combinations = (8 * 8) + 8 + (8 * 8) + 8;
-  assert.equal(combinations, 144);
+test("4系統は確定した拡張候補数を持つ", () => {
+  assert.equal(outfitCatalogs.stage_separate.tops.length, 12);
+  assert.equal(outfitCatalogs.stage_separate.bottoms.length, 22);
+  assert.equal(outfitCatalogs.casual_separate.tops.length, 19);
+  assert.equal(outfitCatalogs.casual_separate.bottoms.length, 29);
+  assert.equal(outfitCatalogs.stage_onepiece.outfits.length, 12);
+  assert.equal(outfitCatalogs.casual_onepiece.outfits.length, 16);
+  assert.equal(outerwearOptions.length, 11);
+  assert.equal(shoeOptions.length, 17);
 });
 
 test("省略されやすいUI名にも衣装種別を明記する", () => {
   assert.equal(outfitCatalogs.stage_separate.bottoms[0].label, "フレアミニスカート");
   assert.equal(outfitCatalogs.stage_onepiece.outfits[0].label, "フィット＆フレアドレス");
-  assert.equal(outfitCatalogs.stage_onepiece.outfits[6].label, "ショートジャンプスーツ");
-  assert.equal(outfitCatalogs.casual_separate.bottoms[0].label, "ストレートデニムパンツ");
-  assert.equal(outfitCatalogs.casual_separate.bottoms[4].label, "ミディプリーツスカート");
+  assert.equal(outfitCatalogs.stage_onepiece.outfits[10].label, "ショートジャンプスーツ");
+  assert.equal(outfitCatalogs.casual_separate.bottoms[11].label, "ストレートデニムパンツ");
+  assert.equal(outfitCatalogs.casual_separate.bottoms[1].label, "ミディプリーツスカート");
 });
 
 test("系統選択時は一覧1番と指定色を初期選択する", () => {
@@ -99,6 +120,9 @@ test("系統選択時は一覧1番と指定色を初期選択する", () => {
   assert.equal(separate.bottomDesign, "casual_bottom_01");
   assert.equal(separate.topColor, "ホワイト");
   assert.equal(separate.bottomColor, "チャコールグレー");
+  assert.equal(separate.outerwear, "none");
+  assert.equal(separate.shoe, "pumps");
+  assert.equal(separate.shoeColor, "ブラック");
   const onepiece = resetOutfitSelection({ ...defaults, outfitType: "casual", outfitStructure: "onepiece" });
   assert.equal(onepiece.outfitDesign, "casual_one_01");
   assert.equal(onepiece.outfitColor, "ホワイト");
@@ -133,10 +157,10 @@ test("表情は真剣を初期値とする確定4種類だけを持つ", () => {
   ]);
 });
 
-test("衣装選択後の指示文は上下分離18行・上下一体17行になる", () => {
-  assert.equal(generatePrompt(stageSeparate).split("\n").length, 18);
+test("衣装選択後の指示文は靴を含む", () => {
+  assert.equal(generatePrompt(stageSeparate).split("\n").length, 19);
   const stageOnepiece = normalizeOutfitState({ ...defaults, outfitType: "stage", outfitStructure: "onepiece" });
-  assert.equal(generatePrompt(stageOnepiece).split("\n").length, 17);
+  assert.equal(generatePrompt(stageOnepiece).split("\n").length, 18);
 });
 
 test("その他の撮影設定は差の大きい確定候補だけを持つ", () => {
@@ -154,7 +178,7 @@ test("全固定フィールドの初期値は有効な選択肢に含まれる",
   }
 });
 
-test("5つの色項目は同じ順序の共通55色を使う", () => {
+test("衣装・アウター・靴・髪・瞳の色項目は同じ順序の共通55色を使う", () => {
   const expectedNames = [
     "ブラック", "ナチュラルブラック", "ソフトブラック", "ブルーブラック", "アッシュブラック", "チャコールブラック",
     "ブラウン", "ナチュラルブラウン", "ココアブラウン", "マロンブラウン", "ダークブラウン", "ベージュ", "キャメル", "モカベージュ", "ヌーディベージュ", "アッシュブラウン", "アッシュベージュ", "グレージュ",
@@ -172,11 +196,11 @@ test("5つの色項目は同じ順序の共通55色を使う", () => {
   assert.deepEqual(commonPalette[29], ["ホワイト", "#F7F7F2"]);
   assert.deepEqual(commonPalette[54], ["スカイブルー", "#78B2CA"]);
 
-  const separateColors = outfitFields({ ...defaults, outfitType: "stage", outfitStructure: "separate" }).filter(({ type }) => type === "color");
-  const onepieceColors = outfitFields({ ...defaults, outfitType: "stage", outfitStructure: "onepiece" }).filter(({ type }) => type === "color");
+  const separateColors = outfitFields({ ...defaults, outfitType: "stage", outfitStructure: "separate", outerwear: "bolero" }).filter(({ type }) => type === "color");
+  const onepieceColors = outfitFields({ ...defaults, outfitType: "stage", outfitStructure: "onepiece", outerwear: "bolero" }).filter(({ type }) => type === "color");
   const hairAndEyeColors = fields.filter(({ type }) => type === "color");
   const colorFields = [...separateColors, ...onepieceColors, ...hairAndEyeColors];
-  assert.deepEqual(colorFields.map(({ id }) => id), ["topColor", "bottomColor", "outfitColor", "hairColor", "eyeColor"]);
+  assert.deepEqual(colorFields.map(({ id }) => id), ["outerwearColor", "topColor", "bottomColor", "shoeColor", "outerwearColor", "outfitColor", "shoeColor", "hairColor", "eyeColor"]);
   colorFields.forEach((field) => assert.strictEqual(paletteFor(field), commonPalette));
 });
 

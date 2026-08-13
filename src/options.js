@@ -7,13 +7,15 @@ import {
   hairstyleOptions,
   personFields,
   shootingFields,
-} from "./catalog.js?v=4.1.0";
+} from "./catalog.js?v=5.0.0";
 import {
   outfitCatalogs,
   outfitDecorationOptions,
   outfitStructureOptions,
   outfitTypeOptions,
-} from "./outfits.js?v=4.1.0";
+  outerwearOptions,
+  shoeOptions,
+} from "./outfits.js?v=5.0.0";
 
 const sectionsRoot = document.querySelector("#catalog-sections");
 const summaryRoot = document.querySelector("#catalog-summary");
@@ -39,10 +41,12 @@ const sections = [
   { title: "衣装の基本設定", fields: [
     { label: "衣装タイプ", note: "初期値なし。選択後に衣装構成を表示", options: plainOptions(outfitTypeOptions.filter((item) => item.value), defaults.outfitType) },
     { label: "衣装構成", note: "初期値なし。衣装タイプ選択後に表示", options: plainOptions(outfitStructureOptions.filter((item) => item.value), defaults.outfitStructure) },
+    { label: "アウター", note: `初期値：${outerwearOptions.find((item) => item.value === defaults.outerwear)?.label}。上下分離・上下一体共通`, options: outerwearOptions.map((item) => option(item.label, item.fullName || "指示文へ出力しない", { isDefault: item.value === defaults.outerwear })) },
     { label: "衣装装飾", note: `初期値：${defaults.outfitDecoration}`, options: plainOptions(outfitDecorationOptions, defaults.outfitDecoration) },
+    { label: "靴", note: `初期値：${shoeOptions.find((item) => item.value === defaults.shoe)?.label}。全衣装共通`, options: shoeOptions.map((item) => option(item.label, item.value === "barefoot" ? "足元は裸足" : item.fullName, { isDefault: item.value === defaults.shoe })) },
   ] },
   ...["ステージ衣装 × 上下分離", "ステージ衣装 × 上下一体", "私服・その他衣装 × 上下分離", "私服・その他衣装 × 上下一体"].map((title) => ({ title, fields: clothingFields.filter((field) => field.section === title) })),
-  { title: "共通55色", fields: [{ label: "髪色・瞳・衣装色", note: "すべて同じ名称・順序・カラーチップを使用", type: "color", options: commonPalette.map(([label, hex]) => option(label, hex, { color: hex, isDefault: [defaults.hairColor, defaults.eyeColor, defaults.topColor, defaults.bottomColor, defaults.outfitColor].includes(label) })) }] },
+  { title: "共通55色", fields: [{ label: "髪色・瞳・衣装・アウター・靴の色", note: "すべて同じ名称・順序・カラーチップを使用", type: "color", options: commonPalette.map(([label, hex]) => option(label, hex, { color: hex, isDefault: [defaults.hairColor, defaults.eyeColor, defaults.topColor, defaults.bottomColor, defaults.outfitColor, defaults.outerwearColor, defaults.shoeColor].includes(label) })) }] },
   { title: "髪・瞳", fields: [
     { label: "髪型", note: `初期値：${hairstyleOptions.find((item) => item.value === defaults.hairstyle)?.label}`, options: hairstyleOptions.map((item) => option(item.label, item.value, { isDefault: item.value === defaults.hairstyle })) },
     { label: "前髪", note: `初期値：${defaults.bangs}`, options: plainOptions(bangsOptions, defaults.bangs) },
@@ -91,7 +95,9 @@ function render() {
   });
 
   const totalOptions = sections.reduce((sum, section) => sum + section.fields.reduce((fieldSum, field) => fieldSum + field.options.length, 0), 0);
-  const cards = [[sections.length, "カテゴリ"], [totalOptions, "掲載行"], [commonPalette.length, "共通色"], [144, "衣装組合せ"]];
+  const stageCombinations = outerwearOptions.length * ((outfitCatalogs.stage_separate.tops.length * outfitCatalogs.stage_separate.bottoms.length) + outfitCatalogs.stage_onepiece.outfits.length) * shoeOptions.length;
+  const casualCombinations = outerwearOptions.length * ((outfitCatalogs.casual_separate.tops.length * outfitCatalogs.casual_separate.bottoms.length) + outfitCatalogs.casual_onepiece.outfits.length) * shoeOptions.length;
+  const cards = [[sections.length, "カテゴリ"], [totalOptions, "掲載行"], [commonPalette.length, "共通色"], [stageCombinations + casualCombinations, "衣装・靴組合せ"]];
   summaryRoot.innerHTML = cards.map(([value, label]) => `<div class="summary-card"><strong>${value}</strong><span>${label}</span></div>`).join("");
   filterCatalog();
 }
