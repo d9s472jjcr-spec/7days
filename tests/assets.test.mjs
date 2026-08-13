@@ -21,30 +21,30 @@ test("旧保存キーを削除し保存形式v6を使用する", async () => {
 
 test("Service Workerは選択肢カタログを含む更新済みキャッシュを使用する", async () => {
   const serviceWorker = await readFile(resolve(root, "sw.js"), "utf8");
-  assert.match(serviceWorker, /const CACHE = "7days-v11"/);
+  assert.match(serviceWorker, /const CACHE = "7days-v12"/);
   assert.match(serviceWorker, /\.\/options\.html/);
   assert.match(serviceWorker, /\.\/src\/options\.js/);
-  assert.match(serviceWorker, /\.\/src\/catalog\.js\?v=6\.0\.0/);
-  assert.match(serviceWorker, /\.\/src\/outfits\.js\?v=6\.0\.0/);
+  assert.match(serviceWorker, /\.\/src\/catalog\.js\?v=6\.0\.1/);
+  assert.match(serviceWorker, /\.\/src\/outfits\.js\?v=6\.0\.1/);
 });
 
-test("HTMLとService Workerは6.0.0のスタイルシートを参照する", async () => {
+test("HTMLとService Workerは6.0.1のスタイルシートを参照する", async () => {
   const index = await readFile(resolve(root, "index.html"), "utf8");
   const options = await readFile(resolve(root, "options.html"), "utf8");
   const serviceWorker = await readFile(resolve(root, "sw.js"), "utf8");
-  assert.match(index, /styles\.css\?v=6\.0\.0/);
-  assert.match(options, /styles\.css\?v=6\.0\.0/);
-  assert.match(options, /options\.css\?v=6\.0\.0/);
-  assert.match(serviceWorker, /styles\.css\?v=6\.0\.0/);
-  assert.match(serviceWorker, /options\.css\?v=6\.0\.0/);
+  assert.match(index, /styles\.css\?v=6\.0\.1/);
+  assert.match(options, /styles\.css\?v=6\.0\.1/);
+  assert.match(options, /options\.css\?v=6\.0\.1/);
+  assert.match(serviceWorker, /styles\.css\?v=6\.0\.1/);
+  assert.match(serviceWorker, /options\.css\?v=6\.0\.1/);
 });
 
 test("選択肢カタログは現行データモジュールを直接参照する", async () => {
   const html = await readFile(resolve(root, "options.html"), "utf8");
   const script = await readFile(resolve(root, "src/options.js"), "utf8");
   assert.match(html, /id="catalog-search"/);
-  assert.match(script, /from "\.\/catalog\.js\?v=6\.0\.0"/);
-  assert.match(script, /from "\.\/outfits\.js\?v=6\.0\.0"/);
+  assert.match(script, /from "\.\/catalog\.js\?v=6\.0\.1"/);
+  assert.match(script, /from "\.\/outfits\.js\?v=6\.0\.1"/);
   assert.match(script, /commonPalette/);
   assert.match(script, /outfitCatalogs/);
 });
@@ -85,9 +85,9 @@ test("iPhone向けviewportとsafe areaを備える", async () => {
   assert.match(css, /min-height:\s*44px/);
 });
 
-test("候補版のパッケージ版番号は6.0.0である", async () => {
+test("候補版のパッケージ版番号は6.0.1である", async () => {
   const packageJson = JSON.parse(await readFile(resolve(root, "package.json"), "utf8"));
-  assert.equal(packageJson.version, "6.0.0");
+  assert.equal(packageJson.version, "6.0.1");
 });
 
 test("コピーとリセットは固定表示のアイコンボタンである", async () => {
@@ -96,10 +96,14 @@ test("コピーとリセットは固定表示のアイコンボタンである",
   assert.match(html, /<nav class="fixed-actions"/);
   assert.match(html, /id="copy-button"[^>]+aria-label="指示文をコピー"/);
   assert.match(html, /id="reset-button"[^>]+aria-label="基準設定に戻す"/);
+  assert.ok(html.indexOf('id="reset-button"') < html.indexOf('id="copy-button"'));
   assert.match(html, /<svg[^>]+aria-hidden="true"/);
   assert.doesNotMatch(html, />指示文をコピー<\/button>|>基準設定に戻す<\/button>/);
   assert.match(css, /\.fixed-actions\s*\{[^}]*position:\s*fixed/s);
-  assert.match(css, /\.fixed-action\s*\{[^}]*min-height:\s*48px/s);
+  assert.match(css, /\.fixed-actions\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) minmax\(0, 1fr\)/s);
+  assert.match(css, /\.fixed-actions\s*\{[^}]*bottom:\s*max\(6px, env\(safe-area-inset-bottom\)\)/s);
+  assert.match(css, /\.fixed-action\s*\{[^}]*width:\s*100%/s);
+  assert.match(css, /\.fixed-action\s*\{[^}]*min-height:\s*50px/s);
 });
 
 test("関連項目を視覚的にまとめるグループを持つ", async () => {

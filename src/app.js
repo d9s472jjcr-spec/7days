@@ -6,7 +6,7 @@ import {
   presetMessage,
   resetOutfitSelection,
   visibleFields,
-} from "./catalog.js?v=6.0.0";
+} from "./catalog.js?v=6.0.1";
 
 const STORAGE_KEY = "7days:last-values:v6";
 const PRESETS_KEY = "7days:presets:v6";
