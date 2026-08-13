@@ -41,10 +41,6 @@
             <span id="line-count" class="line-count"></span>
           </div>
           <textarea id="prompt-output" readonly aria-label="生成された指示文"></textarea>
-          <div class="button-stack">
-            <button id="copy-button" class="button button-primary" type="button">指示文をコピー</button>
-            <button id="reset-button" class="button button-quiet" type="button">基準設定に戻す</button>
-          </div>
           <p class="privacy">入力内容とプリセットはこの端末内だけに保存されます。</p>
         </section>
       </div>
@@ -52,7 +48,16 @@
     <p class="pwa-catalog-link"><a href="./options.html">現在の選択項目・選択肢を見る</a></p>
   </main>
 
+  <nav class="fixed-actions" aria-label="指示文の操作">
+    <button id="copy-button" class="fixed-action fixed-action-primary" type="button" aria-label="指示文をコピー" title="指示文をコピー">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>
+    </button>
+    <button id="reset-button" class="fixed-action" type="button" aria-label="基準設定に戻す" title="基準設定に戻す">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6"></path><path d="M5.6 15a7.5 7.5 0 1 0 .5-7.4L4 10"></path></svg>
+    </button>
+  </nav>
+
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
-  <script type="module" src="./src/app.js?v=5.0.0"></script>
+  <script type="module" src="./src/app.js?v=6.0.0"></script>
 </body>
 </html>

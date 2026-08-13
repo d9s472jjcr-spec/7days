@@ -6,22 +6,18 @@ import {
   presetMessage,
   resetOutfitSelection,
   visibleFields,
-} from "./catalog.js?v=5.0.0";
+} from "./catalog.js?v=6.0.0";
 
-const STORAGE_KEY = "7days:last-values:v5";
-const PRESETS_KEY = "7days:presets:v5";
+const STORAGE_KEY = "7days:last-values:v6";
+const PRESETS_KEY = "7days:presets:v6";
 const SCHEMA_KEY = "7days:schema-version";
 
-if (localStorage.getItem(SCHEMA_KEY) !== "5") {
-  localStorage.removeItem("7days:last-values:v1");
-  localStorage.removeItem("7days:presets:v1");
-  localStorage.removeItem("7days:last-values:v2");
-  localStorage.removeItem("7days:presets:v2");
-  localStorage.removeItem("7days:last-values:v3");
-  localStorage.removeItem("7days:presets:v3");
-  localStorage.removeItem("7days:last-values:v4");
-  localStorage.removeItem("7days:presets:v4");
-  localStorage.setItem(SCHEMA_KEY, "5");
+if (localStorage.getItem(SCHEMA_KEY) !== "6") {
+  for (let version = 1; version <= 5; version += 1) {
+    localStorage.removeItem(`7days:last-values:v${version}`);
+    localStorage.removeItem(`7days:presets:v${version}`);
+  }
+  localStorage.setItem(SCHEMA_KEY, "6");
 }
 
 const state = normalizeOutfitState(loadJson(STORAGE_KEY, defaults));
@@ -123,6 +119,20 @@ document.addEventListener("click", (event) => {
 function renderForm() {
   form.replaceChildren();
   const groups = new Map();
+  const fieldGroups = new Map();
+  const groupLabels = {
+    person: "身体サイズ",
+    "outfit-classification": "衣装分類",
+    outerwear: "アウター",
+    top: "トップス",
+    bottom: "ボトムス",
+    onepiece: "上下一体衣装",
+    shoe: "靴",
+    hair: "髪",
+    presentation: "人物演出",
+    camera: "カメラ",
+    environment: "撮影環境",
+  };
   visibleFields(state).forEach((field) => {
     if (!groups.has(field.section)) {
       const section = document.createElement("section");
@@ -132,6 +142,19 @@ function renderForm() {
       groups.set(field.section, section);
       form.append(section);
     }
+    let target = groups.get(field.section);
+    if (field.group) {
+      const key = `${field.section}:${field.group}`;
+      if (!fieldGroups.has(key)) {
+        const group = document.createElement("section");
+        group.className = `field-group field-group-${field.group}`;
+        group.dataset.group = field.group;
+        group.innerHTML = `<h3>${groupLabels[field.group]}</h3>`;
+        fieldGroups.set(key, group);
+        target.append(group);
+      }
+      target = fieldGroups.get(key);
+    }
     const row = document.createElement("div");
     row.className = "field-row";
     row.dataset.field = field.id;
@@ -139,7 +162,7 @@ function renderForm() {
     label.htmlFor = field.id;
     label.textContent = field.label;
     row.append(label, field.type === "color" ? createColorPicker(field) : createSelect(field));
-    groups.get(field.section).append(row);
+    target.append(row);
   });
 }
 
@@ -203,8 +226,11 @@ function refreshPresets(selected = "") {
 
 copyButton.addEventListener("click", copyPrompt);
 resetButton.addEventListener("click", () => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
-  location.reload();
+  Object.assign(state, defaults);
+  normalizeOutfitState(state);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  renderState();
+  showToast("基準設定に戻しました");
 });
 savePresetButton.addEventListener("click", () => {
   const name = presetName.value.trim();

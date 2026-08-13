@@ -8,20 +8,25 @@ import {
   outfitTypeOptions,
   outerwearOptions,
   shoeOptions,
-} from "./outfits.js?v=5.0.0";
+} from "./outfits.js?v=6.0.0";
 
 export const fixedLines = [
-  "ユーザー指示",
-  "画像の新規生成",
-  "フォトリアル",
-  "架空の20代の成人日本人女性",
-  "美人",
-  "脚の長いモデル体型",
+  "この入力は、画像の新規生成を指示するものとする。",
+  "生成する画像は、フォトリアル画像とする。",
+  "被写体は、架空の20代の成人日本人女性1人とする。",
+  "人物の容姿は、美人とする。",
+  "人物の体型は、脚の長いモデル体型とする。",
+];
+
+export const contactShadowLine = "人物の足元には、ごく薄い自然な接地影を入れる。";
+export const fixedClosingLines = [
+  "画像の縦横比は、縦長の9:16とする。",
+  "画像には、文字、ロゴ、透かし、余分な人物および不要な小物を入れない。",
 ];
 
 export const personFields = [
-  { id: "bust", label: "バスト", section: "人物", options: ["控えめなバスト（79cm相当）", "標準的なバスト（84cm相当）", "豊かなバスト（89cm相当）", "とても豊かなバスト（94cm相当）"] },
-  { id: "hip", label: "ヒップ", section: "人物", options: ["控えめなヒップ（80cm相当）", "標準的なヒップ（85cm相当）", "豊かなヒップ（90cm相当）", "とても豊かなヒップ（95cm相当）"] },
+  { id: "bust", label: "バスト", section: "人物", group: "person", options: ["控えめなバスト（79cm相当）", "標準的なバスト（84cm相当）", "豊かなバスト（89cm相当）", "とても豊かなバスト（94cm相当）"] },
+  { id: "hip", label: "ヒップ", section: "人物", group: "person", options: ["控えめなヒップ（80cm相当）", "標準的なヒップ（85cm相当）", "豊かなヒップ（90cm相当）", "とても豊かなヒップ（95cm相当）"] },
 ];
 
 export const hairstyleOptions = [
@@ -47,23 +52,69 @@ export const hairstyleOptions = [
 export const bangsOptions = ["センターパート", "サイドパート", "かきあげ前髪", "流し前髪", "斜め前髪", "サイドバング", "ワイドバング", "ラウンドバング", "メカクレ"];
 
 export const hairFields = [
-  { id: "hairColor", label: "髪色", section: "髪・瞳", type: "color", prefix: "髪色は" },
-  { id: "hairstyle", label: "髪型", section: "髪・瞳", prefix: "髪型は", options: hairstyleOptions },
-  { id: "bangs", label: "前髪", section: "髪・瞳", prefix: "前髪は", options: bangsOptions },
-  { id: "eyeColor", label: "瞳の色", section: "髪・瞳", type: "color", prefix: "瞳の色は" },
+  { id: "hairColor", label: "髪色", section: "髪・瞳", group: "hair", type: "color" },
+  { id: "hairstyle", label: "髪型", section: "髪・瞳", group: "hair", options: hairstyleOptions },
+  { id: "bangs", label: "前髪", section: "髪・瞳", group: "hair", options: bangsOptions },
+  { id: "eyeColor", label: "瞳の色", section: "髪・瞳", type: "color" },
 ];
 
 export const shootingFields = [
-  { id: "expression", label: "表情", section: "撮影設定", options: [
-    { value: "表情は真剣。口元を自然に閉じ、落ち着いた目元にする", label: "真剣" },
-    { value: "表情は控えめな喜び。口角をわずかに上げ、目元を柔らかくする", label: "喜び" },
-    { value: "表情は控えめな怒り。口をわずかに結び、視線を少し鋭くし、眉の内側をわずかに下げる", label: "怒り" },
-    { value: "表情は控えめな悲しみ。口角と目元をわずかに下げ、眉の内側をわずかに上げる", label: "悲しみ" },
+  { id: "expression", label: "表情", section: "撮影設定", group: "presentation", options: [
+    { value: "人物の表情は真剣とし、口元を自然に閉じ、目元を落ち着かせる。", label: "真剣" },
+    { value: "人物の表情は控えめな喜びとし、口角をわずかに上げ、目元を柔らかくする。", label: "喜び" },
+    { value: "人物の表情は控えめな怒りとし、口をわずかに結び、視線を少し鋭くし、眉の内側をわずかに下げる。", label: "怒り" },
+    { value: "人物の表情は控えめな悲しみとし、口角と目元をわずかに下げ、眉の内側をわずかに上げる。", label: "悲しみ" },
   ] },
-  { id: "pose", label: "ポーズ（任意）", section: "撮影設定", optional: true, prefix: "ポーズは", options: ["", "体をわずかに斜めにした立ち姿", "片手を腰に添えた立ち姿", "椅子に浅く腰掛けた姿勢"] },
-  { id: "framing", label: "構図（任意）", section: "撮影設定", optional: true, prefix: "構図は", options: ["", "頭から膝までが入る縦位置", "ウエストアップ", "バストアップ", "わずかに斜め前からの撮影"] },
-  { id: "background", label: "背景（任意）", section: "撮影設定", optional: true, prefix: "背景は", options: ["", "無地のライトグレーのスタジオ背景", "落ち着いた室内", "明るいオフィス", "自然光の入る窓辺", "背景を自然にぼかした屋外"] },
-  { id: "lighting", label: "照明（任意）", section: "撮影設定", optional: true, prefix: "照明は", options: ["", "窓から入る柔らかな自然光", "明るく清潔感のあるハイキー照明", "落ち着いたローキー照明"] },
+  { id: "pose", label: "ポーズ", section: "撮影設定", group: "presentation", options: [
+    { value: "人物は自然に直立し、両腕を体側へ自然に下ろす。", label: "自然な直立姿勢" },
+    { value: "人物は片脚へ自然に重心を置き、反対側の脚と腰をわずかに緩めて立つ。", label: "片脚重心の立ち姿" },
+    { value: "人物は片手を腰へ自然に添え、反対側の腕を体側へ下ろして立つ。", label: "片手を腰に添える" },
+    { value: "人物は両手を下腹部の前で軽く重ね、肩と肘を自然に緩めて立つ。", label: "両手を前で組む" },
+    { value: "人物は椅子の前方へ浅く腰掛け、背筋を自然に伸ばし、両手を太腿の上へ置く。", label: "椅子に浅く座る" },
+    { value: "人物は両手を左右の腰へ自然に添え、肘を軽く外側へ開いて立つ。", label: "両手を腰に添える" },
+    { value: "人物は両腕を胸の下で軽く組み、肩に力を入れず自然に立つ。", label: "腕を軽く組む" },
+    { value: "人物は片手を胸元へ軽く添え、反対側の腕を体側へ自然に下ろして立つ。", label: "片手を胸元に添える" },
+    { value: "人物は片肘を軽く曲げ、片手を肩より低い位置へ自然に上げ、反対側の腕を体側へ下ろして立つ。", label: "片手を軽く上げる" },
+  ] },
+  { id: "framing", label: "構図", section: "撮影設定", group: "camera", options: [
+    { value: "撮影構図は全身とし、人物の頭頂から足先までを画面内に収める。画像には人物の頭、手、足の周囲に余白を確保し、身体の一部を見切らない。", label: "全身" },
+    { value: "撮影構図は太もも上とし、人物の頭頂から太ももの中央付近までを画面内に収める。", label: "太もも上" },
+    { value: "撮影構図は腰上とし、人物の頭頂から腰付近までを画面内に収める。", label: "腰上" },
+    { value: "撮影構図はバストアップとし、人物の頭頂から胸元までを画面内に収める。", label: "バストアップ" },
+  ] },
+  { id: "cameraAngle", label: "カメラアングル", section: "撮影設定", group: "camera", options: [
+    { value: "カメラは人物の目線の高さに置き、人物の正面から水平に撮影する。", label: "目線の高さ" },
+    { value: "カメラは人物の目線よりわずかに高い位置に置き、強い見下ろしにならない角度で撮影する。", label: "やや高め" },
+    { value: "カメラは人物の目線よりわずかに低い位置に置き、強いあおりにならない角度で撮影する。", label: "やや低め" },
+  ] },
+  { id: "background", label: "背景", section: "撮影設定", group: "environment", options: [
+    { value: "撮影背景は、純白のシームレススタジオ背景とする。", label: "純白のスタジオ" },
+    { value: "撮影背景は、ライトグレーのシームレススタジオ背景とする。", label: "ライトグレーのスタジオ" },
+    { value: "撮影背景は、無機質なコンクリート壁の撮影スタジオとする。", label: "コンクリート壁のスタジオ" },
+    { value: "撮影背景は、家具や装飾を抑えたシンプルな室内とする。", label: "シンプルな室内" },
+    { value: "撮影背景は、整然としたモダンなリビングとする。", label: "モダンなリビング" },
+    { value: "撮影背景は、整然とした現代的なオフィス内装とする。", label: "オフィス" },
+    { value: "撮影背景は、落ち着いた内装のカフェとする。", label: "カフェ" },
+    { value: "撮影背景は、上品な内装のホテルロビーとする。", label: "ホテルロビー" },
+    { value: "撮影背景は、クラシカルな洋館の室内とする。", label: "洋館" },
+    { value: "撮影背景は、畳と障子のある和室とする。", label: "和室" },
+    { value: "撮影背景は、現代的な建物が並ぶ都市の通りとする。", label: "都市の通り" },
+    { value: "撮影背景は、レンガ壁に囲まれた路地とする。", label: "レンガ造りの路地" },
+    { value: "撮影背景は、都市の建物が見える屋上とする。", label: "屋上" },
+    { value: "撮影背景は、樹木と草地のある公園とする。", label: "公園" },
+    { value: "撮影背景は、砂浜と海が見える海辺とする。", label: "海辺" },
+    { value: "撮影背景は、音響設備と小規模ステージを備えたライブハウスとする。", label: "ライブハウス" },
+    { value: "撮影背景は、客席と舞台設備を備えた小規模ホールとする。", label: "小規模ホール" },
+    { value: "撮影背景は、広い客席と本格的な舞台設備を備えた大規模ホールとする。", label: "大規模ホール" },
+    { value: "撮影背景は、広いフロアと大規模な観客席を備えたアリーナ会場とする。", label: "アリーナ" },
+  ] },
+  { id: "lighting", label: "照明", section: "撮影設定", group: "environment", options: [
+    { value: "照明には柔らかなニュートラルの拡散光を使用し、人物全体を均一に照らす。", label: "ニュートラルな拡散照明" },
+    { value: "照明には一方向から入る柔らかな自然光を使用する。", label: "柔らかな自然光" },
+    { value: "照明には影を浅く抑えた均一なハイキー照明を使用する。", label: "ハイキー照明" },
+    { value: "照明には人物の斜め横から当たる柔らかなサイドライトを使用し、人物に自然な立体感を作る。", label: "サイドライト" },
+    { value: "照明には正面からの白色スポットライトと、人物の輪郭を照らす控えめな白色のリムライトを使用する。", label: "ステージ照明" },
+  ] },
 ];
 
 export const fields = [...personFields, ...hairFields, ...shootingFields];
@@ -100,11 +151,12 @@ export const defaults = {
   hairstyle: "顎丈のナチュラルボブ",
   bangs: "流し前髪",
   eyeColor: "ナチュラルブラウン",
-  expression: "表情は真剣。口元を自然に閉じ、落ち着いた目元にする",
-  pose: "",
-  framing: "",
-  background: "",
-  lighting: "",
+  expression: shootingFields[0].options[0].value,
+  pose: shootingFields[1].options[0].value,
+  framing: shootingFields[2].options[0].value,
+  cameraAngle: shootingFields[3].options[0].value,
+  background: shootingFields[4].options[0].value,
+  lighting: shootingFields[5].options[0].value,
 };
 
 export function paletteFor(field) {
@@ -112,29 +164,29 @@ export function paletteFor(field) {
 }
 
 export function outfitFields(values) {
-  const result = [{ id: "outfitType", label: "衣装タイプ", section: "衣装", options: outfitTypeOptions }];
+  const result = [{ id: "outfitType", label: "衣装タイプ", section: "衣装", group: "outfit-classification", options: outfitTypeOptions }];
   if (!values.outfitType) return result;
-  result.push({ id: "outfitStructure", label: "衣装構成", section: "衣装", options: outfitStructureOptions });
+  result.push({ id: "outfitStructure", label: "衣装構成", section: "衣装", group: "outfit-classification", options: outfitStructureOptions });
   const catalog = outfitCatalogFor(values.outfitType, values.outfitStructure);
   if (!catalog) return result;
-  result.push({ id: "outerwear", label: "アウター", section: "衣装", options: outerwearOptions });
-  if (values.outerwear !== "none") result.push({ id: "outerwearColor", label: "アウターの色", section: "衣装", type: "color" });
+  result.push({ id: "outerwear", label: "アウター", section: "衣装", group: "outerwear", options: outerwearOptions });
+  if (values.outerwear !== "none") result.push({ id: "outerwearColor", label: "アウターの色", section: "衣装", group: "outerwear", type: "color" });
   if (values.outfitStructure === "separate") {
     result.push(
-      { id: "topDesign", label: "トップスデザイン", section: "衣装", options: catalog.tops },
-      { id: "topColor", label: "トップスの色", section: "衣装", type: "color" },
-      { id: "bottomDesign", label: "ボトムスデザイン", section: "衣装", options: catalog.bottoms },
-      { id: "bottomColor", label: "ボトムスの色", section: "衣装", type: "color" },
+      { id: "topDesign", label: "トップスデザイン", section: "衣装", group: "top", options: catalog.tops },
+      { id: "topColor", label: "トップスの色", section: "衣装", group: "top", type: "color" },
+      { id: "bottomDesign", label: "ボトムスデザイン", section: "衣装", group: "bottom", options: catalog.bottoms },
+      { id: "bottomColor", label: "ボトムスの色", section: "衣装", group: "bottom", type: "color" },
     );
   } else {
     result.push(
-      { id: "outfitDesign", label: "衣装デザイン", section: "衣装", options: catalog.outfits },
-      { id: "outfitColor", label: "衣装の色", section: "衣装", type: "color" },
+      { id: "outfitDesign", label: "衣装デザイン", section: "衣装", group: "onepiece", options: catalog.outfits },
+      { id: "outfitColor", label: "衣装の色", section: "衣装", group: "onepiece", type: "color" },
     );
   }
   result.push({ id: "outfitDecoration", label: "衣装装飾", section: "衣装", options: outfitDecorationOptions });
-  result.push({ id: "shoe", label: "靴", section: "衣装", options: shoeOptions });
-  if (values.shoe !== "barefoot") result.push({ id: "shoeColor", label: "靴の色", section: "衣装", type: "color" });
+  result.push({ id: "shoe", label: "靴", section: "衣装", group: "shoe", options: shoeOptions });
+  if (values.shoe !== "barefoot") result.push({ id: "shoeColor", label: "靴の色", section: "衣装", group: "shoe", type: "color" });
   return result;
 }
 
@@ -185,41 +237,44 @@ export function normalizeOutfitState(values) {
   return values;
 }
 
-function appendSimpleFields(lines, source, values) {
-  source.forEach((field) => {
-    const value = values[field.id];
-    if (value) lines.push(field.prefix ? `${field.prefix}${value}` : value);
-  });
-}
-
 export function generatePrompt(values) {
   const lines = [...fixedLines];
-  appendSimpleFields(lines, personFields, values);
+  lines.push(`人物のバストは、${values.bust}とする。`);
+  lines.push(`人物のヒップは、${values.hip}とする。`);
 
   const catalog = outfitCatalogFor(values.outfitType, values.outfitStructure);
   if (catalog) {
-    lines.push(`衣装タイプは${outfitLabel(outfitTypeOptions, values.outfitType)}`);
-    lines.push(`衣装構成は${outfitLabel(outfitStructureOptions, values.outfitStructure)}`);
+    lines.push(`人物が着用する衣装のタイプは、${outfitLabel(outfitTypeOptions, values.outfitType)}とする。`);
+    lines.push(`衣装の構成は、${outfitLabel(outfitStructureOptions, values.outfitStructure)}とする。`);
     const outerwear = outfitChoice(outerwearOptions, values.outerwear);
-    if (outerwear?.value !== "none") lines.push(`アウターは${values.outerwearColor}の${outerwear.fullName}`);
+    if (outerwear?.value !== "none") lines.push(`人物が着用するアウターは、${values.outerwearColor}の${outerwear.fullName}とする。`);
     if (values.outfitStructure === "separate") {
       const top = outfitChoice(catalog.tops, values.topDesign);
       const bottom = outfitChoice(catalog.bottoms, values.bottomDesign);
-      if (top) lines.push(`トップスは${values.topColor}の${top.fullName}`);
-      if (bottom) lines.push(`ボトムスは${values.bottomColor}の${bottom.fullName}`);
+      if (top) lines.push(`人物が着用するトップスは、${values.topColor}の${top.fullName}とする。`);
+      if (bottom) lines.push(`人物が着用するボトムスは、${values.bottomColor}の${bottom.fullName}とする。`);
     } else {
       const outfit = outfitChoice(catalog.outfits, values.outfitDesign);
-      if (outfit) lines.push(`衣装は${values.outfitColor}の${outfit.fullName}`);
+      if (outfit) lines.push(`人物が着用する衣装は、${values.outfitColor}の${outfit.fullName}とする。`);
     }
-    if (values.outfitDecoration === "無し") lines.push("衣装装飾は無し");
-    else if (values.outfitDecoration) lines.push(`衣装装飾の${values.outfitDecoration}`);
+    if (values.outfitDecoration === "無し") lines.push("衣装には、装飾を付けない。");
+    else if (values.outfitDecoration?.includes("控えめ")) lines.push("衣装装飾の内容は衣装に合わせて補完し、装飾量は控えめとする。");
+    else if (values.outfitDecoration?.includes("華美")) lines.push("衣装装飾の内容は衣装に合わせて補完し、装飾量は華美とする。");
     const shoe = outfitChoice(shoeOptions, values.shoe);
-    if (shoe?.value === "barefoot") lines.push("足元は裸足");
-    else if (shoe) lines.push(`靴は${values.shoeColor}の${shoe.fullName}`);
+    if (shoe?.value === "barefoot") lines.push("人物の足元は、裸足とする。");
+    else if (shoe) lines.push(`人物が履く靴は、${values.shoeColor}の${shoe.fullName}とする。`);
   }
 
-  appendSimpleFields(lines, hairFields, values);
-  appendSimpleFields(lines, shootingFields, values);
+  lines.push(`人物の髪色は、${values.hairColor}とする。`);
+  lines.push(`人物の髪型は、${values.hairstyle}とする。`);
+  lines.push(`人物の前髪は、${values.bangs}とする。`);
+  lines.push(`人物の瞳の色は、${values.eyeColor}とする。`);
+  shootingFields.forEach((field) => lines.push(values[field.id]));
+  lines.push(fixedClosingLines[0]);
+  if (values.framing === shootingFields.find(({ id }) => id === "framing").options[0].value) {
+    lines.push(contactShadowLine);
+  }
+  lines.push(fixedClosingLines[1]);
   return lines.join("\n");
 }
 
