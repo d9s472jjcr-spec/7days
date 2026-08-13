@@ -11,33 +11,35 @@ test("PWAの主要ファイルが存在する", async () => {
   }
 });
 
-test("旧保存キーを削除し保存形式v4を使用する", async () => {
+test("旧保存キーを削除し保存形式v5を使用する", async () => {
   const app = await readFile(resolve(root, "src/app.js"), "utf8");
-  assert.match(app, /7days:last-values:v4/);
-  assert.match(app, /7days:presets:v4/);
+  assert.match(app, /7days:last-values:v5/);
+  assert.match(app, /7days:presets:v5/);
   assert.match(app, /removeItem\("7days:last-values:v1"\)/);
   assert.match(app, /removeItem\("7days:presets:v1"\)/);
   assert.match(app, /removeItem\("7days:last-values:v2"\)/);
   assert.match(app, /removeItem\("7days:presets:v2"\)/);
   assert.match(app, /removeItem\("7days:last-values:v3"\)/);
   assert.match(app, /removeItem\("7days:presets:v3"\)/);
+  assert.match(app, /removeItem\("7days:last-values:v4"\)/);
+  assert.match(app, /removeItem\("7days:presets:v4"\)/);
 });
 
 test("Service Workerは選択肢カタログを含む更新済みキャッシュを使用する", async () => {
   const serviceWorker = await readFile(resolve(root, "sw.js"), "utf8");
-  assert.match(serviceWorker, /const CACHE = "7days-v9"/);
+  assert.match(serviceWorker, /const CACHE = "7days-v10"/);
   assert.match(serviceWorker, /\.\/options\.html/);
   assert.match(serviceWorker, /\.\/src\/options\.js/);
-  assert.match(serviceWorker, /\.\/src\/catalog\.js\?v=4\.1\.0/);
-  assert.match(serviceWorker, /\.\/src\/outfits\.js\?v=4\.1\.0/);
+  assert.match(serviceWorker, /\.\/src\/catalog\.js\?v=5\.0\.0/);
+  assert.match(serviceWorker, /\.\/src\/outfits\.js\?v=5\.0\.0/);
 });
 
 test("選択肢カタログは現行データモジュールを直接参照する", async () => {
   const html = await readFile(resolve(root, "options.html"), "utf8");
   const script = await readFile(resolve(root, "src/options.js"), "utf8");
   assert.match(html, /id="catalog-search"/);
-  assert.match(script, /from "\.\/catalog\.js\?v=4\.1\.0"/);
-  assert.match(script, /from "\.\/outfits\.js\?v=4\.1\.0"/);
+  assert.match(script, /from "\.\/catalog\.js\?v=5\.0\.0"/);
+  assert.match(script, /from "\.\/outfits\.js\?v=5\.0\.0"/);
   assert.match(script, /commonPalette/);
   assert.match(script, /outfitCatalogs/);
 });

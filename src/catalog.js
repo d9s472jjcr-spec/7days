@@ -6,7 +6,9 @@ import {
   outfitLabel,
   outfitStructureOptions,
   outfitTypeOptions,
-} from "./outfits.js";
+  outerwearOptions,
+  shoeOptions,
+} from "./outfits.js?v=5.0.0";
 
 export const fixedLines = [
   "ユーザー指示",
@@ -83,6 +85,8 @@ export const defaults = {
   hip: "標準的なヒップ（85cm相当）",
   outfitType: "",
   outfitStructure: "",
+  outerwear: "none",
+  outerwearColor: "ホワイト",
   topDesign: "",
   topColor: "ホワイト",
   bottomDesign: "",
@@ -90,6 +94,8 @@ export const defaults = {
   outfitDesign: "",
   outfitColor: "ホワイト",
   outfitDecoration: "内容は衣装に合わせておまかせ、装飾量は控えめ",
+  shoe: "pumps",
+  shoeColor: "ブラック",
   hairColor: "ナチュラルブラウン",
   hairstyle: "顎丈のナチュラルボブ",
   bangs: "流し前髪",
@@ -111,6 +117,8 @@ export function outfitFields(values) {
   result.push({ id: "outfitStructure", label: "衣装構成", section: "衣装", options: outfitStructureOptions });
   const catalog = outfitCatalogFor(values.outfitType, values.outfitStructure);
   if (!catalog) return result;
+  result.push({ id: "outerwear", label: "アウター", section: "衣装", options: outerwearOptions });
+  if (values.outerwear !== "none") result.push({ id: "outerwearColor", label: "アウターの色", section: "衣装", type: "color" });
   if (values.outfitStructure === "separate") {
     result.push(
       { id: "topDesign", label: "トップスデザイン", section: "衣装", options: catalog.tops },
@@ -125,6 +133,8 @@ export function outfitFields(values) {
     );
   }
   result.push({ id: "outfitDecoration", label: "衣装装飾", section: "衣装", options: outfitDecorationOptions });
+  result.push({ id: "shoe", label: "靴", section: "衣装", options: shoeOptions });
+  if (values.shoe !== "barefoot") result.push({ id: "shoeColor", label: "靴の色", section: "衣装", type: "color" });
   return result;
 }
 
@@ -138,6 +148,10 @@ export function resetOutfitSelection(values) {
   values.bottomColor = "チャコールグレー";
   values.outfitColor = "ホワイト";
   values.outfitDecoration = defaults.outfitDecoration;
+  values.outerwear = defaults.outerwear;
+  values.outerwearColor = defaults.outerwearColor;
+  values.shoe = defaults.shoe;
+  values.shoeColor = defaults.shoeColor;
   return values;
 }
 
@@ -156,6 +170,7 @@ export function normalizeOutfitState(values) {
     return values;
   }
   const catalog = outfitCatalogFor(values.outfitType, values.outfitStructure);
+  if (!outfitChoice(outerwearOptions, values.outerwear)) values.outerwear = defaults.outerwear;
   if (values.outfitStructure === "separate") {
     if (!outfitChoice(catalog.tops, values.topDesign)) values.topDesign = catalog.tops[0].value;
     if (!outfitChoice(catalog.bottoms, values.bottomDesign)) values.bottomDesign = catalog.bottoms[0].value;
@@ -166,6 +181,7 @@ export function normalizeOutfitState(values) {
     values.bottomDesign = "";
   }
   if (!outfitDecorationOptions.includes(values.outfitDecoration)) values.outfitDecoration = defaults.outfitDecoration;
+  if (!outfitChoice(shoeOptions, values.shoe)) values.shoe = defaults.shoe;
   return values;
 }
 
@@ -184,6 +200,8 @@ export function generatePrompt(values) {
   if (catalog) {
     lines.push(`衣装タイプは${outfitLabel(outfitTypeOptions, values.outfitType)}`);
     lines.push(`衣装構成は${outfitLabel(outfitStructureOptions, values.outfitStructure)}`);
+    const outerwear = outfitChoice(outerwearOptions, values.outerwear);
+    if (outerwear?.value !== "none") lines.push(`アウターは${values.outerwearColor}の${outerwear.fullName}`);
     if (values.outfitStructure === "separate") {
       const top = outfitChoice(catalog.tops, values.topDesign);
       const bottom = outfitChoice(catalog.bottoms, values.bottomDesign);
@@ -195,6 +213,9 @@ export function generatePrompt(values) {
     }
     if (values.outfitDecoration === "無し") lines.push("衣装装飾は無し");
     else if (values.outfitDecoration) lines.push(`衣装装飾の${values.outfitDecoration}`);
+    const shoe = outfitChoice(shoeOptions, values.shoe);
+    if (shoe?.value === "barefoot") lines.push("足元は裸足");
+    else if (shoe) lines.push(`靴は${values.shoeColor}の${shoe.fullName}`);
   }
 
   appendSimpleFields(lines, hairFields, values);
