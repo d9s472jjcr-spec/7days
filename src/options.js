@@ -7,13 +7,13 @@ import {
   hairstyleOptions,
   personFields,
   shootingFields,
-} from "./catalog.js";
+} from "./catalog.js?v=4.1.0";
 import {
   outfitCatalogs,
   outfitDecorationOptions,
   outfitStructureOptions,
   outfitTypeOptions,
-} from "./outfits.js";
+} from "./outfits.js?v=4.1.0";
 
 const sectionsRoot = document.querySelector("#catalog-sections");
 const summaryRoot = document.querySelector("#catalog-summary");
