@@ -28,6 +28,17 @@ test("Service Workerは選択肢カタログを含む更新済みキャッシュ
   assert.match(serviceWorker, /\.\/src\/outfits\.js\?v=6\.0\.0/);
 });
 
+test("HTMLとService Workerは6.0.0のスタイルシートを参照する", async () => {
+  const index = await readFile(resolve(root, "index.html"), "utf8");
+  const options = await readFile(resolve(root, "options.html"), "utf8");
+  const serviceWorker = await readFile(resolve(root, "sw.js"), "utf8");
+  assert.match(index, /styles\.css\?v=6\.0\.0/);
+  assert.match(options, /styles\.css\?v=6\.0\.0/);
+  assert.match(options, /options\.css\?v=6\.0\.0/);
+  assert.match(serviceWorker, /styles\.css\?v=6\.0\.0/);
+  assert.match(serviceWorker, /options\.css\?v=6\.0\.0/);
+});
+
 test("選択肢カタログは現行データモジュールを直接参照する", async () => {
   const html = await readFile(resolve(root, "options.html"), "utf8");
   const script = await readFile(resolve(root, "src/options.js"), "utf8");
