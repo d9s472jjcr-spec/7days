@@ -25,17 +25,19 @@ test("旧保存キーを削除し保存形式v4を使用する", async () => {
 
 test("Service Workerは選択肢カタログを含む更新済みキャッシュを使用する", async () => {
   const serviceWorker = await readFile(resolve(root, "sw.js"), "utf8");
-  assert.match(serviceWorker, /const CACHE = "7days-v8"/);
+  assert.match(serviceWorker, /const CACHE = "7days-v9"/);
   assert.match(serviceWorker, /\.\/options\.html/);
   assert.match(serviceWorker, /\.\/src\/options\.js/);
+  assert.match(serviceWorker, /\.\/src\/catalog\.js\?v=4\.1\.0/);
+  assert.match(serviceWorker, /\.\/src\/outfits\.js\?v=4\.1\.0/);
 });
 
 test("選択肢カタログは現行データモジュールを直接参照する", async () => {
   const html = await readFile(resolve(root, "options.html"), "utf8");
   const script = await readFile(resolve(root, "src/options.js"), "utf8");
   assert.match(html, /id="catalog-search"/);
-  assert.match(script, /from "\.\/catalog\.js"/);
-  assert.match(script, /from "\.\/outfits\.js"/);
+  assert.match(script, /from "\.\/catalog\.js\?v=4\.1\.0"/);
+  assert.match(script, /from "\.\/outfits\.js\?v=4\.1\.0"/);
   assert.match(script, /commonPalette/);
   assert.match(script, /outfitCatalogs/);
 });
