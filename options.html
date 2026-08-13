@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f6f2eb">
+  <meta name="description" content="人物画像生成PWAで現在使用できる選択項目と選択肢の一覧">
+  <title>選択肢カタログ | 神は7日で世界を作った</title>
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./options.css">
+</head>
+<body>
+  <header class="hero catalog-hero">
+    <p class="catalog-eyebrow">PWA 4.1.0</p>
+    <h1>選択肢カタログ</h1>
+    <p>現在の項目、初期値、画面表示名、指示文への出力語句を一覧できます。</p>
+  </header>
+
+  <main class="catalog-main">
+    <nav class="catalog-nav" aria-label="ページ移動">
+      <a href="./">指示文作成へ戻る</a>
+      <a href="./docs/OPTIONS_CATALOG.md">Markdown版</a>
+    </nav>
+
+    <section class="catalog-toolbar" aria-label="カタログ検索">
+      <label for="catalog-search">選択肢を検索</label>
+      <input id="catalog-search" type="search" placeholder="例：ポニーテール、ホワイト、スカート" autocomplete="off">
+      <p id="catalog-result" class="catalog-result" aria-live="polite"></p>
+    </section>
+
+    <div id="catalog-summary" class="catalog-summary" aria-label="収録内容の概要"></div>
+    <div id="catalog-sections" class="catalog-sections"></div>
+    <p id="catalog-empty" class="catalog-empty" hidden>一致する選択肢はありません。</p>
+  </main>
+
+  <footer class="site-footer">
+    <a href="./">指示文作成へ戻る</a>
+  </footer>
+  <script type="module" src="./src/options.js"></script>
+</body>
+</html>

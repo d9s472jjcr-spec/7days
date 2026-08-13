@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 const root = resolve(import.meta.dirname, "..");
 
 test("PWAの主要ファイルが存在する", async () => {
-  for (const path of ["index.html", "styles.css", "src/app.js", "src/catalog.js", "src/outfits.js", "manifest.webmanifest", "sw.js", "icons/icon-192.png", "icons/icon-512.png"]) {
+  for (const path of ["index.html", "options.html", "styles.css", "options.css", "src/app.js", "src/options.js", "src/catalog.js", "src/outfits.js", "manifest.webmanifest", "sw.js", "icons/icon-192.png", "icons/icon-512.png"]) {
     assert.ok((await stat(resolve(root, path))).size > 0, path);
   }
 });
@@ -23,9 +23,27 @@ test("旧保存キーを削除し保存形式v4を使用する", async () => {
   assert.match(app, /removeItem\("7days:presets:v3"\)/);
 });
 
-test("Service Workerは更新済みキャッシュ名を使用する", async () => {
+test("Service Workerは選択肢カタログを含む更新済みキャッシュを使用する", async () => {
   const serviceWorker = await readFile(resolve(root, "sw.js"), "utf8");
-  assert.match(serviceWorker, /const CACHE = "7days-v7"/);
+  assert.match(serviceWorker, /const CACHE = "7days-v8"/);
+  assert.match(serviceWorker, /\.\/options\.html/);
+  assert.match(serviceWorker, /\.\/src\/options\.js/);
+});
+
+test("選択肢カタログは現行データモジュールを直接参照する", async () => {
+  const html = await readFile(resolve(root, "options.html"), "utf8");
+  const script = await readFile(resolve(root, "src/options.js"), "utf8");
+  assert.match(html, /id="catalog-search"/);
+  assert.match(script, /from "\.\/catalog\.js"/);
+  assert.match(script, /from "\.\/outfits\.js"/);
+  assert.match(script, /commonPalette/);
+  assert.match(script, /outfitCatalogs/);
+});
+
+test("指示文作成画面から選択肢カタログへ移動できる", async () => {
+  const html = await readFile(resolve(root, "index.html"), "utf8");
+  assert.match(html, /href="\.\/options\.html"/);
+  assert.match(html, /現在の選択項目・選択肢を見る/);
 });
 
 test("プリセット読込処理はページを再読み込みしない", async () => {
