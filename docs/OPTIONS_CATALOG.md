@@ -1,6 +1,6 @@
 # 選択項目・選択肢カタログ
 
-現行公開版はPWA 6.0.1、ローカル開発候補は6.1.0。完全な閲覧用一覧は [`options.html`](../options.html) で確認する。GitHub Pagesでも検索、折りたたみ、初期値表示、55色のカラーチップを利用できる。
+現行公開版はPWA 6.1.0。完全な閲覧用一覧は [`options.html`](../options.html) で確認する。GitHub Pagesでも検索、折りたたみ、初期値表示、55色のカラーチップを利用できる。
 
 この文書はGitHub上で構成を素早く把握するための索引であり、選択肢の正本は `src/catalog.js` と `src/outfits.js` である。
 

@@ -85,7 +85,7 @@ test("iPhone向けviewportとsafe areaを備える", async () => {
   assert.match(css, /min-height:\s*44px/);
 });
 
-test("候補版のパッケージ版番号は6.1.0である", async () => {
+test("公開版のパッケージ版番号は6.1.0である", async () => {
   const packageJson = JSON.parse(await readFile(resolve(root, "package.json"), "utf8"));
   assert.equal(packageJson.version, "6.1.0");
 });
