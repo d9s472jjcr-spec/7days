@@ -6,18 +6,18 @@ import {
   presetMessage,
   resetOutfitSelection,
   visibleFields,
-} from "./catalog.js?v=6.1.0";
+} from "./catalog.js?v=6.2.0";
 
-const STORAGE_KEY = "7days:last-values:v7";
-const PRESETS_KEY = "7days:presets:v7";
+const STORAGE_KEY = "7days:last-values:v8";
+const PRESETS_KEY = "7days:presets:v8";
 const SCHEMA_KEY = "7days:schema-version";
 
-if (localStorage.getItem(SCHEMA_KEY) !== "7") {
-  for (let version = 1; version <= 6; version += 1) {
+if (localStorage.getItem(SCHEMA_KEY) !== "8") {
+  for (let version = 1; version <= 7; version += 1) {
     localStorage.removeItem(`7days:last-values:v${version}`);
     localStorage.removeItem(`7days:presets:v${version}`);
   }
-  localStorage.setItem(SCHEMA_KEY, "7");
+  localStorage.setItem(SCHEMA_KEY, "8");
 }
 
 const state = normalizeOutfitState(loadJson(STORAGE_KEY, defaults));
@@ -168,7 +168,7 @@ function renderForm() {
 
 function renderOutput() {
   output.value = generatePrompt(state);
-  document.querySelector("#line-count").textContent = `${output.value.split("\n").length}行`;
+  document.querySelector("#line-count").textContent = `${output.value.match(/。/g)?.length || 0}文`;
 }
 
 function renderState(anchor = null) {

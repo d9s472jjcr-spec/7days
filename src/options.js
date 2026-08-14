@@ -10,7 +10,7 @@ import {
   personFields,
   promptLineForShooting,
   shootingFields,
-} from "./catalog.js?v=6.1.0";
+} from "./catalog.js?v=6.2.0";
 import {
   outfitCatalogs,
   outfitDecorationOptions,
@@ -18,7 +18,7 @@ import {
   outfitTypeOptions,
   outerwearOptions,
   shoeOptions,
-} from "./outfits.js?v=6.1.0";
+} from "./outfits.js?v=6.2.0";
 
 const sectionsRoot = document.querySelector("#catalog-sections");
 const summaryRoot = document.querySelector("#catalog-summary");
@@ -52,11 +52,11 @@ const sections = [
     { label: "靴", note: `初期値：${shoeOptions.find((item) => item.value === defaults.shoe)?.label}。全衣装共通`, options: shoeOptions.map((item) => option(item.label, item.value === "barefoot" ? "足元は裸足" : item.fullName, { isDefault: item.value === defaults.shoe })) },
   ] },
   ...["ステージ衣装 × 上下分離", "ステージ衣装 × 上下一体", "私服・その他衣装 × 上下分離", "私服・その他衣装 × 上下一体"].map((title) => ({ title, fields: clothingFields.filter((field) => field.section === title) })),
-  { title: "共通55色", fields: [{ label: "髪色・瞳・衣装・アウター・靴の色", note: "すべて同じ名称・順序・カラーチップを使用", type: "color", options: commonPalette.map(([label, hex]) => option(label, hex, { color: hex, isDefault: [defaults.hairColor, defaults.eyeColor, defaults.topColor, defaults.bottomColor, defaults.outfitColor, defaults.outerwearColor, defaults.shoeColor].includes(label) })) }] },
+  { title: "共通110色", fields: [{ label: "髪色・瞳・衣装・アウター・靴の色", note: "すべて同じ名称・順序・カラーチップを使用", type: "color", options: commonPalette.map(([label, hex]) => option(label, hex, { color: hex, isDefault: [defaults.hairColor, defaults.eyeColor, defaults.topColor, defaults.bottomColor, defaults.outfitColor, defaults.outerwearColor, defaults.shoeColor].includes(label) })) }] },
   { title: "髪・瞳", fields: [
     { label: "髪型", note: `初期値：${hairstyleOptions.find((item) => item.value === defaults.hairstyle)?.label}`, options: hairstyleOptions.map((item) => option(item.label, item.value, { isDefault: item.value === defaults.hairstyle })) },
     { label: "前髪", note: `初期値：${defaults.bangs}`, options: plainOptions(bangsOptions, defaults.bangs) },
-    { label: "髪色・瞳の色", note: "共通55色を参照", options: [option("共通55色", "髪色・瞳の色は同じカラーカタログから選択")] },
+    { label: "髪色・瞳の色", note: "共通110色を参照", options: [option("共通110色", "髪色・瞳の色は同じカラーカタログから選択")] },
   ] },
   { title: "撮影設定", fields: shootingFields.map((field) => ({
     label: field.label,

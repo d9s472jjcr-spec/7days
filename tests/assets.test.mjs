@@ -11,40 +11,40 @@ test("PWAの主要ファイルが存在する", async () => {
   }
 });
 
-test("旧保存キーを削除し保存形式v7を使用する", async () => {
+test("旧保存キーを削除し保存形式v8を使用する", async () => {
   const app = await readFile(resolve(root, "src/app.js"), "utf8");
-  assert.match(app, /7days:last-values:v7/);
-  assert.match(app, /7days:presets:v7/);
-  assert.match(app, /version <= 6/);
-  assert.match(app, /localStorage\.setItem\(SCHEMA_KEY, "7"\)/);
+  assert.match(app, /7days:last-values:v8/);
+  assert.match(app, /7days:presets:v8/);
+  assert.match(app, /version <= 7/);
+  assert.match(app, /localStorage\.setItem\(SCHEMA_KEY, "8"\)/);
 });
 
 test("Service Workerは選択肢カタログを含む更新済みキャッシュを使用する", async () => {
   const serviceWorker = await readFile(resolve(root, "sw.js"), "utf8");
-  assert.match(serviceWorker, /const CACHE = "7days-v13"/);
+  assert.match(serviceWorker, /const CACHE = "7days-v14"/);
   assert.match(serviceWorker, /\.\/options\.html/);
   assert.match(serviceWorker, /\.\/src\/options\.js/);
-  assert.match(serviceWorker, /\.\/src\/catalog\.js\?v=6\.1\.0/);
-  assert.match(serviceWorker, /\.\/src\/outfits\.js\?v=6\.1\.0/);
+  assert.match(serviceWorker, /\.\/src\/catalog\.js\?v=6\.2\.0/);
+  assert.match(serviceWorker, /\.\/src\/outfits\.js\?v=6\.2\.0/);
 });
 
-test("HTMLとService Workerは6.1.0のスタイルシートを参照する", async () => {
+test("HTMLとService Workerは6.2.0のスタイルシートを参照する", async () => {
   const index = await readFile(resolve(root, "index.html"), "utf8");
   const options = await readFile(resolve(root, "options.html"), "utf8");
   const serviceWorker = await readFile(resolve(root, "sw.js"), "utf8");
-  assert.match(index, /styles\.css\?v=6\.1\.0/);
-  assert.match(options, /styles\.css\?v=6\.1\.0/);
-  assert.match(options, /options\.css\?v=6\.1\.0/);
-  assert.match(serviceWorker, /styles\.css\?v=6\.1\.0/);
-  assert.match(serviceWorker, /options\.css\?v=6\.1\.0/);
+  assert.match(index, /styles\.css\?v=6\.2\.0/);
+  assert.match(options, /styles\.css\?v=6\.2\.0/);
+  assert.match(options, /options\.css\?v=6\.2\.0/);
+  assert.match(serviceWorker, /styles\.css\?v=6\.2\.0/);
+  assert.match(serviceWorker, /options\.css\?v=6\.2\.0/);
 });
 
 test("選択肢カタログは現行データモジュールを直接参照する", async () => {
   const html = await readFile(resolve(root, "options.html"), "utf8");
   const script = await readFile(resolve(root, "src/options.js"), "utf8");
   assert.match(html, /id="catalog-search"/);
-  assert.match(script, /from "\.\/catalog\.js\?v=6\.1\.0"/);
-  assert.match(script, /from "\.\/outfits\.js\?v=6\.1\.0"/);
+  assert.match(script, /from "\.\/catalog\.js\?v=6\.2\.0"/);
+  assert.match(script, /from "\.\/outfits\.js\?v=6\.2\.0"/);
   assert.match(script, /commonPalette/);
   assert.match(script, /outfitCatalogs/);
 });
@@ -85,9 +85,9 @@ test("iPhone向けviewportとsafe areaを備える", async () => {
   assert.match(css, /min-height:\s*44px/);
 });
 
-test("公開版のパッケージ版番号は6.1.0である", async () => {
+test("実装候補のパッケージ版番号は6.2.0である", async () => {
   const packageJson = JSON.parse(await readFile(resolve(root, "package.json"), "utf8"));
-  assert.equal(packageJson.version, "6.1.0");
+  assert.equal(packageJson.version, "6.2.0");
 });
 
 test("コピーとリセットは固定表示のアイコンボタンである", async () => {
