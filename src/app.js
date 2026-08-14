@@ -6,18 +6,18 @@ import {
   presetMessage,
   resetOutfitSelection,
   visibleFields,
-} from "./catalog.js?v=6.0.1";
+} from "./catalog.js?v=6.1.0";
 
-const STORAGE_KEY = "7days:last-values:v6";
-const PRESETS_KEY = "7days:presets:v6";
+const STORAGE_KEY = "7days:last-values:v7";
+const PRESETS_KEY = "7days:presets:v7";
 const SCHEMA_KEY = "7days:schema-version";
 
-if (localStorage.getItem(SCHEMA_KEY) !== "6") {
-  for (let version = 1; version <= 5; version += 1) {
+if (localStorage.getItem(SCHEMA_KEY) !== "7") {
+  for (let version = 1; version <= 6; version += 1) {
     localStorage.removeItem(`7days:last-values:v${version}`);
     localStorage.removeItem(`7days:presets:v${version}`);
   }
-  localStorage.setItem(SCHEMA_KEY, "6");
+  localStorage.setItem(SCHEMA_KEY, "7");
 }
 
 const state = normalizeOutfitState(loadJson(STORAGE_KEY, defaults));

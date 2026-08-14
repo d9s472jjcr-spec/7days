@@ -10,7 +10,7 @@ import {
   personFields,
   promptLineForShooting,
   shootingFields,
-} from "./catalog.js?v=6.0.1";
+} from "./catalog.js?v=6.1.0";
 import {
   outfitCatalogs,
   outfitDecorationOptions,
@@ -18,7 +18,7 @@ import {
   outfitTypeOptions,
   outerwearOptions,
   shoeOptions,
-} from "./outfits.js?v=6.0.1";
+} from "./outfits.js?v=6.1.0";
 
 const sectionsRoot = document.querySelector("#catalog-sections");
 const summaryRoot = document.querySelector("#catalog-summary");
