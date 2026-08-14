@@ -8,11 +8,10 @@ import {
   outfitTypeOptions,
   outerwearOptions,
   shoeOptions,
-} from "./outfits.js?v=6.0.1";
+} from "./outfits.js?v=6.1.0";
 
 export const fixedLines = [
   "画像を新規生成する。",
-  "フォトリアルとする。",
   "被写体は、架空の20代の成人日本人女性1人とする。",
   "容姿は、美人とする。",
   "体型は、脚の長いモデル体型とする。",
@@ -66,15 +65,18 @@ export const shootingFields = [
     { value: "人物の表情は控えめな悲しみとし、口角と目元をわずかに下げ、眉の内側をわずかに上げる。", label: "悲しみ" },
   ] },
   { id: "pose", label: "ポーズ", section: "撮影設定", group: "presentation", options: [
-    { value: "人物は自然に直立し、両腕を体側へ自然に下ろす。", label: "自然な直立姿勢" },
+    { value: "人物は自然に直立する。", label: "自然な直立姿勢" },
     { value: "人物は片脚へ自然に重心を置き、反対側の脚と腰をわずかに緩めて立つ。", label: "片脚重心の立ち姿" },
-    { value: "人物は片手を腰へ自然に添え、反対側の腕を体側へ下ろして立つ。", label: "片手を腰に添える" },
-    { value: "人物は両手を下腹部の前で軽く重ね、肩と肘を自然に緩めて立つ。", label: "両手を前で組む" },
-    { value: "人物は椅子の前方へ浅く腰掛け、背筋を自然に伸ばし、両手を太腿の上へ置く。", label: "椅子に浅く座る" },
-    { value: "人物は両手を左右の腰へ自然に添え、肘を軽く外側へ開いて立つ。", label: "両手を腰に添える" },
-    { value: "人物は両腕を胸の下で軽く組み、肩に力を入れず自然に立つ。", label: "腕を軽く組む" },
-    { value: "人物は片手を胸元へ軽く添え、反対側の腕を体側へ自然に下ろして立つ。", label: "片手を胸元に添える" },
-    { value: "人物は片肘を軽く曲げ、片手を肩より低い位置へ自然に上げ、反対側の腕を体側へ下ろして立つ。", label: "片手を軽く上げる" },
+    { value: "人物は片手を腰へ自然に添えて立つ。", label: "片手を腰に添える" },
+    { value: "人物は両手を下腹部の前で軽く重ねて立つ。", label: "両手を前で組む" },
+    { value: "人物は椅子の前方へ浅く腰掛け、背筋を自然に伸ばす。", label: "椅子に浅く座る" },
+    { value: "人物は両手を左右の腰へ自然に添えて立つ。", label: "両手を腰に添える" },
+    { value: "人物は両腕を胸の下で軽く組んで立つ。", label: "腕を軽く組む" },
+    { value: "人物は片手を胸元へ軽く添えて立つ。", label: "片手を胸元に添える" },
+    { value: "人物は片手を肩より低い位置へ自然に上げて立つ。", label: "片手を軽く上げる" },
+    { value: "人物は椅子に深く腰掛けて脚を組み、片手で自然に頬杖をつく。", label: "椅子に深く座り、脚を組んで頬杖" },
+    { value: "人物は床にあぐらをかいて座り、上体を自然に起こす。", label: "床にあぐらをかいて座る" },
+    { value: "人物は床に座って片膝を立て、もう片方の脚は自然にまっすぐ人物の正面へ伸ばす。", label: "床に片膝を立てて座る" },
   ] },
   { id: "framing", label: "構図", section: "撮影設定", group: "camera", options: [
     { value: "撮影構図は全身とし、人物の頭頂から足先までを画面内に収める。画像には人物の頭、手、足の周囲に余白を確保し、身体の一部を見切らない。", label: "全身" },
@@ -83,9 +85,15 @@ export const shootingFields = [
     { value: "撮影構図はバストアップとし、人物の頭頂から胸元までを画面内に収める。", label: "バストアップ" },
   ] },
   { id: "cameraAngle", label: "カメラアングル", section: "撮影設定", group: "camera", options: [
-    { value: "カメラは人物の目線の高さに置き、人物の正面から水平に撮影する。", label: "目線の高さ" },
-    { value: "カメラは人物の目線よりわずかに高い位置に置き、強い見下ろしにならない角度で撮影する。", label: "やや高め" },
-    { value: "カメラは人物の目線よりわずかに低い位置に置き、強いあおりにならない角度で撮影する。", label: "やや低め" },
+    { value: "カメラは人物の目線の高さに置き、水平に撮影する。", label: "目線の高さ" },
+    { value: "カメラは人物の目線よりわずかに高い位置に置き、強い見下ろしにならない角度とする。", label: "やや高め" },
+    { value: "カメラは人物の目線よりわずかに低い位置に置き、強いあおりにならない角度とする。", label: "やや低め" },
+  ] },
+  { id: "cameraDirection", label: "撮影方向", section: "撮影設定", group: "camera", options: [
+    { value: "撮影方向は、人物の正面からとする。", label: "正面" },
+    { value: "撮影方向は、人物の正面に対して斜め45度からとする。", label: "斜め45度" },
+    { value: "撮影方向は、人物の真横からとする。", label: "真横" },
+    { value: "撮影方向は、人物の背中側からとする。", label: "背面" },
   ] },
   { id: "background", label: "背景", section: "撮影設定", group: "environment", options: [
     { value: "撮影背景は、純白のシームレススタジオ背景とする。", label: "純白のスタジオ" },
@@ -155,8 +163,9 @@ export const defaults = {
   pose: shootingFields[1].options[0].value,
   framing: shootingFields[2].options[0].value,
   cameraAngle: shootingFields[3].options[0].value,
-  background: shootingFields[4].options[0].value,
-  lighting: shootingFields[5].options[0].value,
+  cameraDirection: shootingFields[4].options[0].value,
+  background: shootingFields[5].options[0].value,
+  lighting: shootingFields[6].options[0].value,
 };
 
 export function paletteFor(field) {
@@ -280,18 +289,11 @@ export function generatePrompt(values) {
 
 export function promptLineForShooting(fieldId, value) {
   if (fieldId === "expression") return value.replace(/^人物の/, "");
-  if (fieldId === "pose") {
-    if (value === "人物は椅子の前方へ浅く腰掛け、背筋を自然に伸ばし、両手を太腿の上へ置く。") {
-      return "椅子の前方へ浅く腰掛け、背筋を自然に伸ばす。腕と手は姿勢に合う自然な位置とする。";
-    }
-    return value.replace(/^人物は/, "");
-  }
+  if (fieldId === "pose") return value.replace(/^人物は/, "");
   if (fieldId === "framing") return value
     .replaceAll("人物の頭頂", "頭頂")
     .replace("画像には人物の頭、手、足", "頭、手、足");
-  if (fieldId === "cameraAngle") return value
-    .replaceAll("人物の目線", "被写体の目線")
-    .replace("人物の正面", "正面");
+  if (fieldId === "cameraAngle") return value.replaceAll("人物の目線", "被写体の目線");
   if (fieldId === "lighting") return value
     .replace("人物全体", "全身")
     .replace("人物の斜め横", "斜め横")

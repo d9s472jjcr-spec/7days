@@ -21,7 +21,6 @@ import {
 import { outfitCatalogs, outerwearOptions, shoeOptions } from "../src/outfits.js";
 
 const noOutfitBaseline = `画像を新規生成する。
-フォトリアルとする。
 被写体は、架空の20代の成人日本人女性1人とする。
 容姿は、美人とする。
 体型は、脚の長いモデル体型とする。
@@ -32,9 +31,10 @@ const noOutfitBaseline = `画像を新規生成する。
 前髪は、流し前髪とする。
 瞳の色は、ナチュラルブラウンとする。
 表情は真剣とし、口元を自然に閉じ、目元を落ち着かせる。
-自然に直立し、両腕を体側へ自然に下ろす。
+自然に直立する。
 撮影構図は全身とし、頭頂から足先までを画面内に収める。頭、手、足の周囲に余白を確保し、身体の一部を見切らない。
-カメラは被写体の目線の高さに置き、正面から水平に撮影する。
+カメラは被写体の目線の高さに置き、水平に撮影する。
+撮影方向は、人物の正面からとする。
 撮影背景は、純白のシームレススタジオ背景とする。
 照明には柔らかなニュートラルの拡散光を使用し、全身を均一に照らす。
 縦横比は、縦長の9:16とする。
@@ -144,11 +144,11 @@ test("無効な保存値は現行カタログの1番へ補正する", () => {
 });
 
 test("表情と必須の撮影設定は定められた順で追記する", () => {
-  const [expression, pose, framing, cameraAngle, background, lighting] = shootingFields.map((field) => field.options.at(-1).value);
-  const prompt = generatePrompt({ ...defaults, expression, pose, framing, cameraAngle, background, lighting });
+  const [expression, pose, framing, cameraAngle, cameraDirection, background, lighting] = shootingFields.map((field) => field.options.at(-1).value);
+  const prompt = generatePrompt({ ...defaults, expression, pose, framing, cameraAngle, cameraDirection, background, lighting });
   const lines = prompt.split("\n");
-  const shootingValues = [expression, pose, framing, cameraAngle, background, lighting];
-  assert.deepEqual(lines.slice(-8), shootingValues.map((value, index) => promptLineForShooting(shootingFields[index].id, value)).concat(["縦横比は、縦長の9:16とする。", "文字、ロゴ、透かし、余分な人物、不要な小物は入れない。"]));
+  const shootingValues = [expression, pose, framing, cameraAngle, cameraDirection, background, lighting];
+  assert.deepEqual(lines.slice(-9), shootingValues.map((value, index) => promptLineForShooting(shootingFields[index].id, value)).concat(["縦横比は、縦長の9:16とする。", "文字、ロゴ、透かし、余分な人物、不要な小物は入れない。"]));
 });
 
 test("容姿と体型はUIから廃止し固定文として出力する", () => {
@@ -176,22 +176,62 @@ test("衣装選択後の指示文は靴を含む", () => {
 
 test("撮影設定は承認済みの必須候補だけを持つ", () => {
   const byId = Object.fromEntries(shootingFields.map((field) => [field.id, field]));
-  assert.deepEqual(shootingFields.map(({ id }) => id), ["expression", "pose", "framing", "cameraAngle", "background", "lighting"]);
-  assert.deepEqual([byId.expression.options.length, byId.pose.options.length, byId.framing.options.length, byId.cameraAngle.options.length, byId.background.options.length, byId.lighting.options.length], [4, 9, 4, 3, 19, 5]);
+  assert.deepEqual(shootingFields.map(({ id }) => id), ["expression", "pose", "framing", "cameraAngle", "cameraDirection", "background", "lighting"]);
+  assert.deepEqual([byId.expression.options.length, byId.pose.options.length, byId.framing.options.length, byId.cameraAngle.options.length, byId.cameraDirection.options.length, byId.background.options.length, byId.lighting.options.length], [4, 12, 4, 3, 4, 19, 5]);
   assert.ok(shootingFields.every((field) => !field.optional && field.options.every((option) => option.value.endsWith("。"))));
   assert.equal(byId.pose.options[0].label, "自然な直立姿勢");
   assert.deepEqual(byId.pose.options.find(({ label }) => label === "椅子に浅く座る"), {
-    value: "人物は椅子の前方へ浅く腰掛け、背筋を自然に伸ばし、両手を太腿の上へ置く。",
+    value: "人物は椅子の前方へ浅く腰掛け、背筋を自然に伸ばす。",
     label: "椅子に浅く座る",
   });
   assert.equal(
     promptLineForShooting("pose", byId.pose.options.find(({ label }) => label === "椅子に浅く座る").value),
-    "椅子の前方へ浅く腰掛け、背筋を自然に伸ばす。腕と手は姿勢に合う自然な位置とする。",
+    "椅子の前方へ浅く腰掛け、背筋を自然に伸ばす。",
   );
+  assert.deepEqual(byId.pose.options.slice(-3), [
+    { value: "人物は椅子に深く腰掛けて脚を組み、片手で自然に頬杖をつく。", label: "椅子に深く座り、脚を組んで頬杖" },
+    { value: "人物は床にあぐらをかいて座り、上体を自然に起こす。", label: "床にあぐらをかいて座る" },
+    { value: "人物は床に座って片膝を立て、もう片方の脚は自然にまっすぐ人物の正面へ伸ばす。", label: "床に片膝を立てて座る" },
+  ]);
   assert.equal(byId.framing.options[0].label, "全身");
   assert.equal(byId.cameraAngle.options[0].label, "目線の高さ");
+  assert.deepEqual(byId.cameraDirection.options.map(({ label }) => label), ["正面", "斜め45度", "真横", "背面"]);
+  assert.equal(defaults.cameraDirection, byId.cameraDirection.options[0].value);
   assert.equal(byId.background.options[0].label, "純白のスタジオ");
   assert.equal(byId.lighting.options[0].label, "ニュートラルな拡散照明");
+});
+
+test("12種類のポーズは承認済みの最小限の手・腕指定だけを持つ", () => {
+  const pose = shootingFields.find(({ id }) => id === "pose");
+  assert.deepEqual(pose.options, [
+    { value: "人物は自然に直立する。", label: "自然な直立姿勢" },
+    { value: "人物は片脚へ自然に重心を置き、反対側の脚と腰をわずかに緩めて立つ。", label: "片脚重心の立ち姿" },
+    { value: "人物は片手を腰へ自然に添えて立つ。", label: "片手を腰に添える" },
+    { value: "人物は両手を下腹部の前で軽く重ねて立つ。", label: "両手を前で組む" },
+    { value: "人物は椅子の前方へ浅く腰掛け、背筋を自然に伸ばす。", label: "椅子に浅く座る" },
+    { value: "人物は両手を左右の腰へ自然に添えて立つ。", label: "両手を腰に添える" },
+    { value: "人物は両腕を胸の下で軽く組んで立つ。", label: "腕を軽く組む" },
+    { value: "人物は片手を胸元へ軽く添えて立つ。", label: "片手を胸元に添える" },
+    { value: "人物は片手を肩より低い位置へ自然に上げて立つ。", label: "片手を軽く上げる" },
+    { value: "人物は椅子に深く腰掛けて脚を組み、片手で自然に頬杖をつく。", label: "椅子に深く座り、脚を組んで頬杖" },
+    { value: "人物は床にあぐらをかいて座り、上体を自然に起こす。", label: "床にあぐらをかいて座る" },
+    { value: "人物は床に座って片膝を立て、もう片方の脚は自然にまっすぐ人物の正面へ伸ばす。", label: "床に片膝を立てて座る" },
+  ]);
+  for (const label of ["自然な直立姿勢", "片脚重心の立ち姿", "椅子に浅く座る", "床にあぐらをかいて座る", "床に片膝を立てて座る"]) {
+    assert.doesNotMatch(pose.options.find((option) => option.label === label).value, /腕|手/, label);
+  }
+});
+
+test("カメラアングルは高さ、撮影方向は見る方向だけを指定する", () => {
+  const byId = Object.fromEntries(shootingFields.map((field) => [field.id, field]));
+  byId.cameraAngle.options.forEach(({ value }) => assert.doesNotMatch(value, /正面|真横|背中|45度/));
+  byId.cameraDirection.options.forEach(({ value }) => assert.doesNotMatch(value, /目線|見下ろし|あおり|高い|低い/));
+  assert.deepEqual(byId.cameraDirection.options.map(({ value }) => value), [
+    "撮影方向は、人物の正面からとする。",
+    "撮影方向は、人物の正面に対して斜め45度からとする。",
+    "撮影方向は、人物の真横からとする。",
+    "撮影方向は、人物の背中側からとする。",
+  ]);
 });
 
 test("全身構図だけ接地影を出力する", () => {
@@ -291,8 +331,9 @@ test("前髪は確定した9種類だけを持つ", () => {
   assert.ok(!bangsOptions.includes("ぱっつん前髪"));
 });
 
-test("固定条件は主語切替時だけ明示して必須条件を保持する", () => {
-  assert.deepEqual(fixedLines, ["画像を新規生成する。", "フォトリアルとする。", "被写体は、架空の20代の成人日本人女性1人とする。", "容姿は、美人とする。", "体型は、脚の長いモデル体型とする。"]);
+test("固定条件は画風を指定せず必須条件を保持する", () => {
+  assert.deepEqual(fixedLines, ["画像を新規生成する。", "被写体は、架空の20代の成人日本人女性1人とする。", "容姿は、美人とする。", "体型は、脚の長いモデル体型とする。"]);
+  assert.doesNotMatch(generatePrompt(defaults), /フォトリアル|アニメ|画風/);
 });
 
 test("選択肢は重複しない", () => {
