@@ -10,6 +10,7 @@
 |---|---|
 | 公開PWA | 6.2.0、GitHub Pagesで公開。改行なしの指示文、共通110色、髪型26種類、照明16種類、衣装デザイン211種類、保存形式v8を含む |
 | PWA実装・試験 | 6.2.0の自動試験46件、GitHub Pagesデプロイ、iPhone 16実機Safari確認、現行GPTとの独立した新規会話3件による生成画像試験に合格 |
+| ローカル開発候補 | 7.0.0。単一画面内で写真・アニメを再読込なしに切り替え、アニメ専用保存形式v1、目の形6種類、表情16種類、ポーズ45種類、構図7種類、カメラアングル7種類、照明32種類を実装。自動試験67件に合格。未コミット・未公開であり、iPhone 16実機確認と画像生成GPT連携試験は未実施 |
 | 画像生成GPT | 画風非依存のPWA入力に対応し、画風を常時フォトリアルとする固定規則、撮影方向の保持、実行判定を保存済み。6.2.0ではGPT設定を変更していない。非公開Instructions本文は公開せず、設定ハッシュだけを品質ログへ記録。6.2.0の同一基準指示文による生成画像3枚をユーザーが目視し、すべて合格 |
 | 旧・指示文生成GPT | 共有停止、完全削除、旧リンク無効化まで完了 |
 | 保存形式 | 公開版6.2.0はv8を使用し、旧v1～v7は移行しない |
@@ -35,7 +36,7 @@ GitHubとChatGPTは別系統で管理する。GitHubの権限だけでは画像�
 1. リポジトリを取得し、`main`、最新コミット、未反映のPull RequestとIssueを確認する。
 2. `package.json` の版とREADMEの公開版が一致することを確認する。
 3. `npm test` を実行し、全試験が成功することを確認する。
-4. `npm run serve` でローカル表示、指示文生成、コピー、プリセット保存・読込・削除を確認する。
+4. `npm run serve` で単一画面内の写真・アニメ切替、各状態の復元、指示文生成、コピー、プリセット保存・読込・削除を確認する。
 5. GitHub Pagesが `main` / `/` から配信され、公開URLがHTTPSで開けることを確認する。
 6. iPhone 16のSafariで公開版またはLAN版を確認する。
 7. 現行画像生成GPTの編集権限と共有状態を確認する。設定本文やリンクは公開GitHubへ転記しない。
@@ -47,9 +48,11 @@ GitHubとChatGPTは別系統で管理する。GitHubの権限だけでは画像�
 
 | 情報 | 正本 |
 |---|---|
-| 選択肢、初期値、指示文規則 | `src/catalog.js`、`src/outfits.js` |
-| UI動作、端末保存、プリセット | `src/app.js` |
+| 写真版の選択肢、初期値、指示文規則 | `src/catalog.js`、`src/outfits.js` |
+| アニメ版の選択肢、初期値、指示文規則 | `src/anime-catalog.js`、`src/anime-shooting.js`、`src/outfits.js` |
+| UI動作、モード設定、端末保存、プリセット | `src/app.js`、`src/mode-config.js` |
 | 画面構造と見た目 | `index.html`、`styles.css` |
+| 人が閲覧する選択肢台帳 | [`7days_options_catalog.xlsx`](7days_options_catalog.xlsx)。実装変更時はコード・試験と同じ変更単位で更新する |
 | オフライン資産 | `sw.js` |
 | PWAメタデータ | `manifest.webmanifest` |
 | 実装契約 | `tests/*.test.mjs` と `docs/PWA_SPECIFICATION.md` |
