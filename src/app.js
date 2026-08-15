@@ -1,44 +1,58 @@
 import {
-  defaults,
-  generatePrompt,
-  normalizeOutfitState,
-  paletteFor,
-  presetMessage,
-  resetOutfitSelection,
-  visibleFields,
-} from "./catalog.js?v=6.2.0";
+  modeConfigs,
+  modeFromSearch,
+  normalizeMode,
+  prepareStorageForMode,
+} from "./mode-config.js?v=7.0.0";
 
-const STORAGE_KEY = "7days:last-values:v8";
-const PRESETS_KEY = "7days:presets:v8";
-const SCHEMA_KEY = "7days:schema-version";
-
-if (localStorage.getItem(SCHEMA_KEY) !== "8") {
-  for (let version = 1; version <= 7; version += 1) {
-    localStorage.removeItem(`7days:last-values:v${version}`);
-    localStorage.removeItem(`7days:presets:v${version}`);
-  }
-  localStorage.setItem(SCHEMA_KEY, "8");
-}
-
-const state = normalizeOutfitState(loadJson(STORAGE_KEY, defaults));
 const form = document.querySelector("#prompt-form");
 const output = document.querySelector("#prompt-output");
 const copyButton = document.querySelector("#copy-button");
 const resetButton = document.querySelector("#reset-button");
+const modeSwitchButton = document.querySelector("#mode-switch-button");
 const presetName = document.querySelector("#preset-name");
 const presetSelect = document.querySelector("#preset-select");
 const savePresetButton = document.querySelector("#save-preset");
 const deletePresetButton = document.querySelector("#delete-preset");
 const toast = document.querySelector("#toast");
 const presetCard = document.querySelector(".preset-card");
+const heading = document.querySelector(".hero h1");
+const themeColor = document.querySelector('meta[name="theme-color"]');
+const description = document.querySelector('meta[name="description"]');
 
-function loadJson(key, fallback) {
+const modeStates = new Map();
+let activeModeId = modeFromSearch(window.location.search);
+let activeConfig;
+let state;
+
+function loadObject(key, fallback = {}) {
   try {
     const value = JSON.parse(localStorage.getItem(key));
-    return value && typeof value === "object" ? { ...fallback, ...value } : { ...fallback };
+    return value && typeof value === "object" && !Array.isArray(value) ? value : fallback;
   } catch {
-    return { ...fallback };
+    return fallback;
   }
+}
+
+function stateFromValues(config, values = {}) {
+  const clean = { ...config.catalog.defaults };
+  Object.keys(clean).forEach((key) => {
+    if (Object.hasOwn(values, key)) clean[key] = values[key];
+  });
+  return config.catalog.normalizeOutfitState(clean);
+}
+
+function loadModeState(modeId) {
+  if (modeStates.has(modeId)) return modeStates.get(modeId);
+  const config = modeConfigs[modeId];
+  prepareStorageForMode(modeId, localStorage);
+  const loaded = stateFromValues(config, loadObject(config.storageKey));
+  modeStates.set(modeId, loaded);
+  return loaded;
+}
+
+function persistState() {
+  localStorage.setItem(activeConfig.storageKey, JSON.stringify(state));
 }
 
 function optionRecord(option) {
@@ -57,7 +71,7 @@ function createSelect(field) {
     option.textContent = record.label;
     select.append(option);
   });
-  select.value = state[field.id] ?? defaults[field.id];
+  select.value = state[field.id] ?? activeConfig.catalog.defaults[field.id];
   select.addEventListener("change", () => updateValue(field.id, select.value));
   return select;
 }
@@ -77,12 +91,12 @@ function createColorPicker(field) {
   panel.setAttribute("role", "listbox");
   panel.hidden = true;
 
-  const choices = paletteFor(field);
+  const choices = activeConfig.catalog.paletteFor(field);
   function paint(value) {
     const match = choices.find(([name]) => name === value) || choices[0];
     button.innerHTML = `<span class="swatch" style="--swatch:${match[1]}"></span><span>${match[0]}</span><span class="chevron">⌄</span>`;
   }
-  paint(state[field.id] ?? defaults[field.id]);
+  paint(state[field.id] ?? activeConfig.catalog.defaults[field.id]);
 
   choices.forEach(([name, hex]) => {
     const option = document.createElement("button");
@@ -129,11 +143,12 @@ function renderForm() {
     onepiece: "上下一体衣装",
     shoe: "靴",
     hair: "髪",
+    eye: "目",
     presentation: "人物演出",
     camera: "カメラ",
     environment: "撮影環境",
   };
-  visibleFields(state).forEach((field) => {
+  activeConfig.catalog.visibleFields(state).forEach((field) => {
     if (!groups.has(field.section)) {
       const section = document.createElement("section");
       section.className = "form-section card";
@@ -167,7 +182,7 @@ function renderForm() {
 }
 
 function renderOutput() {
-  output.value = generatePrompt(state);
+  output.value = activeConfig.catalog.generatePrompt(state);
   document.querySelector("#line-count").textContent = `${output.value.match(/。/g)?.length || 0}文`;
 }
 
@@ -184,12 +199,12 @@ function updateValue(id, value) {
   state[id] = value;
   if (id === "outfitType") {
     if (!value) state.outfitStructure = "";
-    if (state.outfitStructure) resetOutfitSelection(state);
-    else normalizeOutfitState(state);
+    if (state.outfitStructure) activeConfig.catalog.resetOutfitSelection(state);
+    else activeConfig.catalog.normalizeOutfitState(state);
   } else if (id === "outfitStructure") {
-    resetOutfitSelection(state);
+    activeConfig.catalog.resetOutfitSelection(state);
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  persistState();
   renderState();
 }
 
@@ -211,7 +226,9 @@ async function copyPrompt() {
   }
 }
 
-function presets() { return loadJson(PRESETS_KEY, {}); }
+function presets() {
+  return loadObject(activeConfig.presetsKey);
+}
 
 function refreshPresets(selected = "") {
   presetSelect.innerHTML = '<option value="">プリセットを選択</option>';
@@ -224,47 +241,90 @@ function refreshPresets(selected = "") {
   presetSelect.value = selected;
 }
 
+function updateUrl(modeId, action) {
+  const url = new URL(window.location.href);
+  if (modeId === "anime") url.searchParams.set("mode", "anime");
+  else url.searchParams.delete("mode");
+  window.history[`${action}State`]({ mode: modeId }, "", url);
+}
+
+function applyModePresentation(config) {
+  document.documentElement.classList.toggle("mode-anime", config.id === "anime");
+  heading.textContent = config.heading;
+  themeColor.setAttribute("content", config.themeColor);
+  description.setAttribute("content", config.description);
+  presetName.placeholder = config.presetPlaceholder;
+  modeSwitchButton.setAttribute("aria-label", config.switchLabel);
+  modeSwitchButton.setAttribute("title", config.switchLabel);
+  modeSwitchButton.innerHTML = config.switchIcon;
+}
+
+function activateMode(modeId, { historyAction = "none", preserveScroll = false } = {}) {
+  const nextMode = normalizeMode(modeId);
+  const scrollTop = preserveScroll ? window.scrollY : null;
+  activeModeId = nextMode;
+  activeConfig = modeConfigs[nextMode];
+  state = loadModeState(nextMode);
+  if (historyAction !== "none") updateUrl(nextMode, historyAction);
+  applyModePresentation(activeConfig);
+  presetName.value = "";
+  toast.hidden = true;
+  renderState();
+  refreshPresets();
+  if (scrollTop !== null) {
+    requestAnimationFrame(() => {
+      const maximum = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      window.scrollTo(0, Math.min(scrollTop, maximum));
+    });
+  }
+}
+
 copyButton.addEventListener("click", copyPrompt);
 resetButton.addEventListener("click", () => {
-  Object.assign(state, defaults);
-  normalizeOutfitState(state);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  state = stateFromValues(activeConfig);
+  modeStates.set(activeModeId, state);
+  persistState();
   renderState();
   showToast("基準設定に戻しました");
+});
+modeSwitchButton.addEventListener("click", () => {
+  activateMode(activeConfig.targetMode, { historyAction: "push", preserveScroll: true });
 });
 savePresetButton.addEventListener("click", () => {
   const name = presetName.value.trim();
   if (!name) return showToast("プリセット名を入力してください");
   const all = presets();
   all[name] = { ...state };
-  localStorage.setItem(PRESETS_KEY, JSON.stringify(all));
+  localStorage.setItem(activeConfig.presetsKey, JSON.stringify(all));
   presetName.value = "";
   refreshPresets(name);
-  showToast(presetMessage("save", name));
+  showToast(activeConfig.catalog.presetMessage("save", name));
 });
 presetSelect.addEventListener("change", () => {
   const name = presetSelect.value;
   const selected = presets()[name];
   if (!selected) return;
-  Object.assign(state, defaults, selected);
-  normalizeOutfitState(state);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  state = stateFromValues(activeConfig, selected);
+  modeStates.set(activeModeId, state);
+  persistState();
   renderState(presetCard);
   refreshPresets(name);
-  showToast(presetMessage("load", name));
+  showToast(activeConfig.catalog.presetMessage("load", name));
 });
 deletePresetButton.addEventListener("click", () => {
   if (!presetSelect.value) return showToast("削除するプリセットを選択してください");
   const name = presetSelect.value;
   const all = presets();
   delete all[name];
-  localStorage.setItem(PRESETS_KEY, JSON.stringify(all));
+  localStorage.setItem(activeConfig.presetsKey, JSON.stringify(all));
   refreshPresets();
-  showToast(presetMessage("delete", name));
+  showToast(activeConfig.catalog.presetMessage("delete", name));
 });
+window.addEventListener("popstate", () => activateMode(modeFromSearch(window.location.search)));
 
-renderState();
-refreshPresets();
+const requestedMode = new URLSearchParams(window.location.search).get("mode");
+if (requestedMode && requestedMode !== "anime") updateUrl("photo", "replace");
+activateMode(activeModeId);
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));
