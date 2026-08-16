@@ -1,62 +1,108 @@
-import * as photoCatalog from "./catalog.js?v=7.0.0";
-import * as animeCatalog from "./anime-catalog.js?v=7.0.0";
+import * as catalog from "./unified-catalog.js";
 
-const brushIcon = '<svg class="mode-icon mode-icon-brush" viewBox="0 0 24 24" aria-hidden="true"><path d="m9.1 12 8-8a2.8 2.8 0 1 1 4 4l-8 8"></path><path d="M7.1 14c-1.7 0-3 1.3-3 3 0 1.3-1.2 2-2 2 1 1.2 2.5 2 4 2 2.8 0 5-2.2 5-5a2 2 0 0 0-2-2Z"></path></svg>';
-const cameraIcon = '<svg class="mode-icon mode-icon-camera" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5 13 3H9L7.5 5H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z"></path><circle cx="11" cy="12" r="4"></circle></svg>';
-
-export const modeConfigs = Object.freeze({
-  photo: Object.freeze({
-    id: "photo",
-    catalog: photoCatalog,
-    storageKey: "7days:last-values:v8",
-    presetsKey: "7days:presets:v8",
-    schemaKey: "7days:schema-version",
-    schemaVersion: "8",
-    heading: "神は7日で世界を作った",
-    description: "人物画像生成用の日本語指示文を端末内だけで作成するPWA",
-    themeColor: "#f6f2eb",
-    presetPlaceholder: "例：白シャツ・スタジオ",
-    targetMode: "anime",
-    switchLabel: "アニメ人物イラスト用へ切り替える",
-    switchIcon: brushIcon,
-  }),
-  anime: Object.freeze({
-    id: "anime",
-    catalog: animeCatalog,
-    storageKey: "7days:anime:last-values:v1",
-    presetsKey: "7days:anime:presets:v1",
-    schemaKey: "7days:anime:schema-version",
-    schemaVersion: "1",
-    heading: "3日くらい休んでいいのに",
-    description: "アニメ人物イラスト生成用の日本語指示文を端末内だけで作成するPWA",
-    themeColor: "#f0eef8",
-    presetPlaceholder: "例：ステージ衣装・全身",
-    targetMode: "photo",
-    switchLabel: "フォトリアル人物画像用へ切り替える",
-    switchIcon: cameraIcon,
-  }),
+export const appConfig = Object.freeze({
+  catalog,
+  storageKey: "7days:unified:last-values:v1",
+  presetsKey: "7days:unified:presets:v1",
+  schemaKey: "7days:unified:schema-version",
+  schemaVersion: "1",
 });
 
-export function normalizeMode(value) {
-  return value === "anime" ? "anime" : "photo";
+export const legacyPhotoKeys = Object.freeze({
+  storageKey: "7days:last-values:v8",
+  presetsKey: "7days:presets:v8",
+  schemaKey: "7days:schema-version",
+});
+
+const upperUnderwearMigration = Object.freeze({
+  casual_top_07: "three_quarter_bra", casual_top_08: "full_cup_bra",
+  casual_top_09: "three_quarter_bra", casual_top_10: "three_quarter_bra",
+  casual_top_11: "strapless_bra", casual_top_12: "bralette",
+  casual_top_13: "sports_bra", casual_top_27: "camisole",
+  casual_top_30: "longline_bra", casual_top_31: "three_quarter_bra",
+});
+const lowerUnderwearMigration = Object.freeze({
+  casual_bottom_19: "normal_panties", casual_bottom_20: "high_waist_panties",
+  casual_bottom_21: "hip_hanger_panties", casual_bottom_22: "boy_length_panties",
+  casual_bottom_44: "high_leg_panties", casual_bottom_45: "t_back_panties",
+  casual_bottom_46: "lace_panties",
+});
+
+function parseObject(value) {
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+  } catch { return null; }
 }
 
-export function modeFromSearch(search = "") {
-  return normalizeMode(new URLSearchParams(search).get("mode"));
+function mapLegacyExpression(value, target) {
+  const text = String(value || "");
+  const eye = catalog.faceFields.find(({ id }) => id === "eyeExpression").options;
+  const mouth = catalog.faceFields.find(({ id }) => id === "mouthExpression").options;
+  if (text.includes("喜び")) { target.eyeExpression = eye[1].value; target.mouthExpression = mouth[4].value; }
+  else if (text.includes("怒り")) { target.eyeExpression = eye[4].value; target.mouthExpression = mouth[13].value; }
+  else if (text.includes("悲しみ")) { target.eyeExpression = eye[5].value; target.mouthExpression = mouth[14].value; }
+  else if (text.includes("真剣")) { target.eyeExpression = eye[2].value; target.mouthExpression = mouth[0].value; }
 }
 
-export function prepareStorageForMode(modeId, storage) {
-  const config = modeConfigs[normalizeMode(modeId)];
-  if (storage.getItem(config.schemaKey) === config.schemaVersion) return;
+function mapLegacyShooting(values, target) {
+  const fields = Object.fromEntries(catalog.shootingFields.map((field) => [field.id, field]));
+  const pick = (id, index) => fields[id].options[index]?.value || catalog.defaults[id];
+  const valid = (id, value) => fields[id].options.some((option) => option.value === value);
 
-  if (config.id === "photo") {
-    for (let version = 1; version <= 7; version += 1) {
-      storage.removeItem(`7days:last-values:v${version}`);
-      storage.removeItem(`7days:presets:v${version}`);
-    }
-  } else {
-    storage.removeItem(config.storageKey);
-    storage.removeItem(config.presetsKey);
+  if (!valid("pose", target.pose)) target.pose = catalog.defaults.pose;
+  if (!valid("framing", target.framing)) {
+    const text = String(values.framing || "");
+    target.framing = text.includes("太もも") ? pick("framing", 2)
+      : text.includes("腰上") ? pick("framing", 3)
+        : text.includes("バストアップ") ? pick("framing", 4)
+          : pick("framing", 0);
   }
-  storage.setItem(config.schemaKey, config.schemaVersion);
+  if (!valid("cameraAngle", target.cameraAngle)) {
+    const text = String(values.cameraAngle || "");
+    target.cameraAngle = text.includes("高い") ? pick("cameraAngle", 1)
+      : text.includes("低い") ? pick("cameraAngle", 4)
+        : pick("cameraAngle", 0);
+  }
+  ["cameraDirection", "background"].forEach((id) => {
+    if (!valid(id, target[id])) target[id] = catalog.defaults[id];
+  });
+  if (!valid("lighting", target.lighting)) target.lighting = catalog.defaults.lighting;
+}
+
+export function migrateLegacyPhotoValues(values = {}) {
+  const migrated = { ...catalog.defaults };
+  Object.keys(migrated).forEach((key) => {
+    if (Object.hasOwn(values, key)) migrated[key] = values[key];
+  });
+  mapLegacyExpression(values.expression, migrated);
+  if (upperUnderwearMigration[values.topDesign]) {
+    migrated.upperUnderwear = upperUnderwearMigration[values.topDesign];
+    migrated.upperUnderwearColor = values.topColor || "ホワイト";
+    migrated.topDesign = "none";
+  }
+  if (lowerUnderwearMigration[values.bottomDesign]) {
+    migrated.lowerUnderwear = lowerUnderwearMigration[values.bottomDesign];
+    migrated.lowerUnderwearColor = values.bottomColor || "ホワイト";
+    migrated.bottomDesign = "none";
+  }
+  mapLegacyShooting(values, migrated);
+  return catalog.normalizeState(migrated);
+}
+
+export function prepareUnifiedStorage(storage) {
+  if (storage.getItem(appConfig.schemaKey) === appConfig.schemaVersion) return false;
+  if (!storage.getItem(appConfig.storageKey)) {
+    const legacy = parseObject(storage.getItem(legacyPhotoKeys.storageKey));
+    if (legacy) storage.setItem(appConfig.storageKey, JSON.stringify(migrateLegacyPhotoValues(legacy)));
+  }
+  if (!storage.getItem(appConfig.presetsKey)) {
+    const legacyPresets = parseObject(storage.getItem(legacyPhotoKeys.presetsKey));
+    if (legacyPresets) {
+      const migrated = Object.fromEntries(Object.entries(legacyPresets).map(([name, values]) => [name, migrateLegacyPhotoValues(values)]));
+      storage.setItem(appConfig.presetsKey, JSON.stringify(migrated));
+    }
+  }
+  storage.setItem(appConfig.schemaKey, appConfig.schemaVersion);
+  return true;
 }
