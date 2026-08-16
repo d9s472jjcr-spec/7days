@@ -3,7 +3,7 @@ const choice = (value, label, fullName) => ({ value, label, fullName });
 export const outfitTypeOptions = [
   { value: "", label: "選択してください" },
   { value: "stage", label: "ステージ衣装" },
-  { value: "casual", label: "私服・その他衣装" },
+  { value: "casual", label: "私服" },
 ];
 
 export const outfitStructureOptions = [
@@ -14,6 +14,7 @@ export const outfitStructureOptions = [
 
 export const outerwearOptions = [
   choice("none", "無し", ""),
+  choice("auto", "おまかせ", ""),
   choice("bolero", "ボレロ", "クロップド丈のボレロ"),
   choice("cropped_jacket", "クロップドジャケット", "ウエスト上丈のクロップドジャケット"),
   choice("short_jacket", "ショートジャケット", "ウエスト丈のショートジャケット"),
@@ -27,7 +28,8 @@ export const outerwearOptions = [
 ];
 
 export const shoeOptions = [
-  choice("barefoot", "裸足", ""),
+  choice("barefoot", "無し（裸足）", ""),
+  choice("auto", "おまかせ", ""),
   choice("ballet", "バレエシューズ", "バレエシューズ"),
   choice("flat_pumps", "フラットパンプス", "フラットパンプス"),
   choice("pumps", "パンプス", "パンプス"),
@@ -50,6 +52,36 @@ export const outfitDecorationOptions = [
   "無し",
   "内容は衣装に合わせておまかせ、装飾量は控えめ",
   "内容は衣装に合わせておまかせ、装飾量は華美",
+];
+
+export const upperUnderwearOptions = [
+  choice("none", "無し", ""), choice("auto", "おまかせ", ""),
+  choice("three_quarter_bra", "3/4カップブラ", "3/4カップブラ"),
+  choice("full_cup_bra", "フルカップブラ", "フルカップブラ"),
+  choice("half_cup_bra", "ハーフカップブラ", "ハーフカップブラ"),
+  choice("wireless_bra", "ノンワイヤーブラ", "ノンワイヤーブラ"),
+  choice("strapless_bra", "ストラップレスブラ", "ストラップレスブラ"),
+  choice("bralette", "ブラレット", "ブラレット"),
+  choice("sports_bra", "スポーツブラ", "スポーツブラ"),
+  choice("longline_bra", "ロングラインブラ", "ロングラインブラ"),
+  choice("bra_top", "ブラトップ", "ブラトップ"),
+  choice("camisole", "キャミソール", "キャミソール"),
+  choice("bustier", "ビスチェ", "ビスチェ"),
+];
+
+export const lowerUnderwearOptions = [
+  choice("none", "無し", ""), choice("auto", "おまかせ", ""),
+  choice("normal_panties", "ノーマルショーツ", "ノーマルショーツ"),
+  choice("high_waist_panties", "ハイウエストショーツ", "ハイウエストショーツ"),
+  choice("hip_hanger_panties", "ヒップハンガーショーツ", "ヒップハンガーショーツ"),
+  choice("boy_length_panties", "ボーイレングスショーツ", "ボーイレングスショーツ"),
+  choice("high_leg_panties", "ハイレグショーツ", "ハイレグショーツ"),
+  choice("t_back_panties", "Tバックショーツ", "Tバックショーツ"),
+  choice("long_panties", "ロングショーツ", "ロングショーツ"),
+  choice("lace_panties", "レースショーツ", "レースショーツ"),
+  choice("girdle", "ガードル", "ガードル"),
+  choice("pettipants", "ペチパンツ", "ペチパンツ"),
+  choice("petticoat", "ペチコート", "ペチコート"),
 ];
 
 const stageTops = [
@@ -167,18 +199,8 @@ const casualTops = [
   choice("casual_top_24", "カーディガン", "長袖・Vネック・ウエスト丈 カーディガン"),
   choice("casual_top_25", "タートルネックニット", "長袖・タートルネック・ウエスト丈 ニットトップ"),
   choice("casual_top_26", "Vネックニット", "長袖・Vネック・ウエスト丈 ニットトップ"),
-  choice("casual_top_27", "キャミソール", "細い肩紐・スクエアネック・ウエスト丈 キャミソール"),
   choice("casual_top_28", "タンクトップ", "ノースリーブ・クルーネック・ウエスト丈 タンクトップ"),
   choice("casual_top_29", "シアーブラウス", "長袖・スタンドカラー・ヒップ上丈 シアーブラウス"),
-  choice("casual_top_07", "ブラジャー", "ベーシックなブラジャー"),
-  choice("casual_top_08", "フルカップブラ", "バスト全体を覆うフルカップブラ"),
-  choice("casual_top_09", "バルコネットブラ", "水平に近いカップラインのバルコネットブラ"),
-  choice("casual_top_10", "プランジブラ", "中央が深く開いたプランジブラ"),
-  choice("casual_top_11", "ストラップレスブラ", "肩紐のないストラップレスブラ"),
-  choice("casual_top_12", "ブラレット", "ワイヤー感を抑えたブラレット"),
-  choice("casual_top_13", "スポーツブラ", "身体に沿うスポーツブラ"),
-  choice("casual_top_30", "ロングラインブラ", "アンダーベルトを長く取ったロングラインブラ"),
-  choice("casual_top_31", "フロントホックブラ", "前中心に留め具を備えたフロントホックブラ"),
   choice("casual_top_14", "ビキニトップ", "ベーシックなビキニトップ"),
   choice("casual_top_15", "トライアングルビキニトップ", "三角形カップのビキニトップ"),
   choice("casual_top_16", "バンドゥビキニトップ", "肩紐のないバンドゥビキニトップ"),
@@ -222,13 +244,6 @@ const casualBottoms = [
   choice("casual_bottom_41", "ガウチョパンツ", "ハイウエスト・ミディ丈 ガウチョパンツ"),
   choice("casual_bottom_42", "クロップドワイドパンツ", "ハイウエスト・足首丈 ワイドパンツ"),
   choice("casual_bottom_43", "ベイカーパンツ", "ジャストウエスト・フルレングス ベイカーパンツ"),
-  choice("casual_bottom_19", "ショーツ", "ベーシックなショーツ"),
-  choice("casual_bottom_20", "ハイウエストショーツ", "ウエストを深く覆うハイウエストショーツ"),
-  choice("casual_bottom_21", "ヒップハンガーショーツ", "腰位置が低いヒップハンガーショーツ"),
-  choice("casual_bottom_22", "ボーイレッグショーツ", "脚口を広く覆うボーイレッグショーツ"),
-  choice("casual_bottom_44", "ハイレッグショーツ", "脚口を高く取ったハイレッグショーツ"),
-  choice("casual_bottom_45", "Tバックショーツ", "背面を細い帯状にしたTバックショーツ"),
-  choice("casual_bottom_46", "レースショーツ", "全体にレースを使用したショーツ"),
   choice("casual_bottom_23", "ビキニボトム", "ベーシックなビキニボトム"),
   choice("casual_bottom_24", "ハイウエストビキニボトム", "ウエストを深く覆うビキニボトム"),
   choice("casual_bottom_25", "サイドリボンビキニボトム", "両脇をリボンで結ぶビキニボトム"),
@@ -296,6 +311,6 @@ export function firstOutfitSelection(type, structure) {
   const common = { outerwear: "none", topDesign: "", bottomDesign: "", outfitDesign: "", shoe: "pumps" };
   const catalog = outfitCatalogFor(type, structure);
   if (!catalog) return common;
-  if (structure === "separate") return { ...common, topDesign: catalog.tops[0].value, bottomDesign: catalog.bottoms[0].value };
-  return { ...common, outfitDesign: catalog.outfits[0].value };
+  if (structure === "separate") return { ...common, topDesign: "auto", bottomDesign: "auto" };
+  return { ...common, outfitDesign: "auto" };
 }

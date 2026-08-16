@@ -1,5 +1,5 @@
-const CACHE = "7days-v16";
-const ASSETS = ["./", "./index.html", "./styles.css?v=7.0.0", "./src/app.js?v=7.0.0", "./src/mode-config.js?v=7.0.0", "./src/catalog.js?v=7.0.0", "./src/anime-catalog.js?v=7.0.0", "./src/anime-shooting.js?v=7.0.0", "./src/outfits.js?v=7.0.0", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
+const CACHE = "7days-v17";
+const ASSETS = ["./", "./index.html", "./styles.css?v=8.0.0", "./src/app.js?v=8.0.0", "./src/mode-config.js", "./src/unified-catalog.js", "./src/catalog.js", "./src/anime-shooting.js", "./src/outfits.js", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting()));

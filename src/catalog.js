@@ -8,7 +8,7 @@ import {
   outfitTypeOptions,
   outerwearOptions,
   shoeOptions,
-} from "./outfits.js?v=7.0.0";
+} from "./outfits.js";
 
 export const fixedLines = [
   "画像を新規生成する。",
