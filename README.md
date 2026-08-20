@@ -37,9 +37,10 @@ iPhone実機確認時は、同一Wi-Fi内のPCで `npm run serve:lan` を実行�
 2. [PWA仕様書](docs/PWA_SPECIFICATION.md)
 3. [運用・公開手順書](docs/OPERATIONS_RUNBOOK.md)
 4. [画像生成GPT運用手順書](docs/GPT_OPERATIONS.md)
-5. [選択肢Excel台帳](docs/7days_options_catalog.xlsx)
 
-現行公開版はPWA 8.0.0です。写真・アニメのモード切替を廃止し、画風非依存の指示文生成を単一画面へ統合しました。自動試験、GitHub Pages配信資産、モバイル相当表示は確認済みで、iPhone 16実機Safari確認は未実施です。検証履歴は `docs/` 内の計画書、品質ログ、運用文書を参照してください。
+選択肢、初期値、UI表示名、出力語句、色チップの正本は、`src/` 内の選択肢データと `tests/` 内の自動試験です。別形式の選択肢台帳は運用しません。
+
+現行公開版はPWA 8.0.0です。写真・アニメのモード切替を廃止し、画風非依存の指示文生成を単一画面へ統合しました。自動試験、GitHub Pages配信資産、モバイル相当表示、iPhone 16実機Safariのユーザー確認に合格しています。検証履歴は `docs/` 内の計画書、品質ログ、運用文書を参照してください。
 
 ## 非公開情報の扱い
 

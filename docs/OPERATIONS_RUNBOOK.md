@@ -30,7 +30,7 @@ npm run serve:lan
 1. `main` の最新状態、未完了PR、Issue、Pages状態を確認する。
 2. 変更目的ごとにブランチを作る。
 3. 仕様変更なら、実装前に選択肢、初期値、出力例、保存データへの影響を確定する。
-4. 実装と同時に自動試験と [`7days_options_catalog.xlsx`](7days_options_catalog.xlsx) の更新要否を確認する。
+4. 実装と同時に自動試験を更新し、選択肢データと契約試験の整合を確認する。
 5. `npm test` を実行する。
 6. ローカルで影響範囲を操作確認する。
 7. UIまたは操作変更なら393×852相当の確認後、iPhone実機Safariで確認する。
@@ -139,14 +139,9 @@ Pages設定、対象ブランチ、最新コミット、主要ファイルの存
 
 保存形式を更新済みの場合、コードを戻しても削除されたlocalStorageは復元されない。この影響を先に説明する。
 
-## 11. 選択肢Excel台帳
+## 11. 選択肢管理
 
-人が閲覧する選択肢一覧は [`7days_options_catalog.xlsx`](7days_options_catalog.xlsx) を正規台帳とし、Web版カタログは運用しない。選択肢、初期値、UI表示名、出力語句、色チップを変更した場合は、実装・試験と同じ変更単位で台帳も更新する。
-
-- 元データは `src/unified-catalog.js`、`src/catalog.js`、`src/anime-shooting.js`、`src/outfits.js` とする。
-- 台帳を編集しただけで実装が変更されたとは扱わない。コードと試験が動作上の正本である。
-- 更新後は数、順序、初期値、UI表示名、出力語句をコードと照合し、数式エラーや欠落がないことを確認する。
-- スプレッドシート専用編集・検証環境を利用できない場合は、代替ライブラリで無理に書き換えず、台帳更新を未完了として報告する。
+選択肢、初期値、UI表示名、出力語句、色チップは、`src/unified-catalog.js`、`src/catalog.js`、`src/anime-shooting.js`、`src/outfits.js` を正本とする。変更時は `tests/unified-prompt.test.mjs` と `tests/assets.test.mjs` を同じ変更単位で更新し、自動試験と公開版のコピー結果を照合する。別形式の選択肢台帳は運用しない。
 
 ## 12. 定期点検
 

@@ -5,7 +5,7 @@
 本PWAは、架空の20代の成人日本人女性を対象に、人物画像生成用の日本語指示文を選択式で作成する完全クライアント処理型PWAである。写真・アニメのモードを分けず、単一の `index.html` で画風非依存の共通指示文を生成する。画風は出力先の画像生成GPTが決定する。
 
 - 現行公開版: 8.0.0
-- 公開版確認: 自動試験19件、393×852相当のブラウザー確認、GitHub Pages配信資産の8.0.0・`7days-v17`・単一統合構成確認に合格。iPhone 16実機Safari確認は未実施
+- 公開版確認: 自動試験19件、393×852相当のブラウザー確認、GitHub Pages配信資産の8.0.0・`7days-v17`・単一統合構成確認、iPhone 16実機Safariのユーザー確認に合格
 - 6.2.0実機確認: 2026-08-15、iPhone 16 Safariでユーザー確認に合格
 - 6.2.0画像品質確認: 2026-08-15、同一基準指示文を写真用画像生成GPTの独立した新規会話3件へ投入し、ユーザー目視で3枚すべて合格
 - 7.0.0アニメ画像品質確認: 2026-08-15、「アニメ人物イラスト 新規生成GPT v2」の生成画像をユーザーが目視し、品質合格・正式採用
@@ -26,7 +26,6 @@
 | `src/outfits.js` | 衣装タイプ、衣装構成、衣装、下着、装飾、靴の候補 |
 | `src/app.js` | 画面描画、状態管理、プリセット、コピー、通知、Service Worker登録 |
 | `src/mode-config.js` | 統合保存キー、旧写真版v8からの一度限りの移行 |
-| `docs/7days_options_catalog.xlsx` | 人が閲覧する選択肢Excel台帳 |
 | `sw.js` | オフラインキャッシュ |
 | `manifest.webmanifest` | インストール情報とアイコン |
 | `tests/unified-prompt.test.mjs` | 統合指示文、選択肢、衣装分岐、保存移行の契約試験 |
@@ -153,7 +152,7 @@ Service Workerは主要静的資産を事前キャッシュし、旧キャッシ
 
 | 変更 | 主な更新対象 | 必須確認 |
 |---|---|---|
-| 選択肢・初期値・出力語句 | `src/unified-catalog.js`、`anime-shooting.js` または `outfits.js` | 統合prompt試験、文順、Excel台帳、公開版コピー結果 |
+| 選択肢・初期値・出力語句 | `src/unified-catalog.js`、`anime-shooting.js` または `outfits.js` | 統合prompt試験、文順、公開版コピー結果 |
 | 項目構造 | 上記に加えて `src/app.js`、`src/mode-config.js` | 保存形式更新の要否、旧データ処理 |
 | UI・見た目 | `index.html`、`styles.css`、`src/app.js` | 393×852、実機Safari、スクロール維持 |
 | 静的資産 | 対象ファイル、`sw.js` | キャッシュ名と資産一覧 |
@@ -170,6 +169,6 @@ Service Workerは主要静的資産を事前キャッシュし、旧キャッシ
 - UIまたは挙動変更時はiPhone 16実機Safariで合格する。
 - 画像品質に影響する変更時は `GPT_OPERATIONS.md` の独立3件試験でユーザーが明示的に合格する。
 
-## 11. 選択肢Excel台帳
+## 11. 選択肢管理
 
-人が閲覧する選択肢一覧は [`7days_options_catalog.xlsx`](7days_options_catalog.xlsx) を台帳とし、Web版カタログは廃止する。動作上の正本は `unified-catalog.js`、`catalog.js`、`anime-shooting.js`、`outfits.js` と契約試験である。8.0.0の統合項目はExcelへ未反映であり、更新完了まではコードと契約試験を参照する。選択肢、初期値、UI表示名、出力語句、色チップを変更した場合は、コード・試験と同じ変更単位でExcel台帳を更新して照合する。
+選択肢、初期値、UI表示名、出力語句、色チップは、`unified-catalog.js`、`catalog.js`、`anime-shooting.js`、`outfits.js` と契約試験を正本とする。変更時はコードと試験を同じ変更単位で更新し、公開版のコピー結果まで照合する。別形式の選択肢台帳は運用しない。

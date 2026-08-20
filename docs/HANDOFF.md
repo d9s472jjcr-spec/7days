@@ -9,13 +9,13 @@
 | 対象 | 状態 |
 |---|---|
 | 開発PWA | 8.0.0。写真・アニメのモード切替を廃止し、画風非依存の指示文生成を単一画面へ統合 |
-| PWA実装・試験 | 8.0.0をGitHub Pagesへ公開済み。自動試験19件、393×852相当のブラウザー確認、公開資産の版・キャッシュ・統合構成確認に合格。iPhone 16実機Safari確認は未実施 |
+| PWA実装・試験 | 8.0.0をGitHub Pagesへ公開済み。自動試験19件、393×852相当のブラウザー確認、公開資産の版・キャッシュ・統合構成確認、iPhone 16実機Safariのユーザー確認に合格 |
 | 写真用画像生成GPT | 画風非依存のPWA入力へ常にフォトリアルを適用する固定規則、撮影方向の保持、実行判定を保存済み。6.2.0の同一基準指示文による生成画像3枚をユーザーが目視し、すべて合格 |
 | アニメ用画像生成GPT | 正式運用版は「アニメ人物イラスト 新規生成GPT v2」。非公開設定のバックアップと設定ハッシュを確認し、ユーザーの生成画像目視確認で品質合格・正式採用 |
 | アニメ用試験GPT | 「アニメ人物イラスト 新規生成GPT vTest」は不合格・非採用。「アニメ人物イラスト 新規生成GPT v2.1.0.0TEST」は正式採用せず比較用として保持 |
 | 旧・指示文生成GPT | 共有停止、完全削除、旧リンク無効化まで完了 |
 | 保存形式 | 統合v1を使用し、旧写真版v8を初回だけ移行する。旧キーは削除しない |
-| 選択肢Excel台帳 | 8.0.0の統合項目は未反映。更新完了まではコードと契約試験を動作上の正本とする |
+| 選択肢管理 | `src/` 内の選択肢データと `tests/` 内の自動試験を正本とし、別形式の選択肢台帳は運用しない |
 | 公開方式 | `main` ブランチのリポジトリ直下をGitHub Pagesで配信 |
 
 この表は引き継ぎ時点の記録である。作業開始時にはGitHubの最新状態、Pages設定、公開版、GPTの共有状態を再確認する。
@@ -53,7 +53,7 @@ GitHubとChatGPTは別系統で管理する。GitHubの権限だけでは画像�
 | 統合版の選択肢、初期値、指示文規則 | `src/unified-catalog.js`、`src/catalog.js`、`src/anime-shooting.js`、`src/outfits.js` |
 | UI動作、端末保存、旧データ移行、プリセット | `src/app.js`、`src/mode-config.js` |
 | 画面構造と見た目 | `index.html`、`styles.css` |
-| 人が閲覧する選択肢台帳 | [`7days_options_catalog.xlsx`](7days_options_catalog.xlsx)。実装変更時はコード・試験と同じ変更単位で更新する |
+| 選択肢、初期値、UI表示名、出力語句、色チップ | `src/unified-catalog.js`、`src/catalog.js`、`src/anime-shooting.js`、`src/outfits.js` と `tests/*.test.mjs` |
 | オフライン資産 | `sw.js` |
 | PWAメタデータ | `manifest.webmanifest` |
 | 実装契約 | `tests/*.test.mjs` と `docs/PWA_SPECIFICATION.md` |
