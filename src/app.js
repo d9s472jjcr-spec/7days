@@ -5,12 +5,7 @@ const form = document.querySelector("#prompt-form");
 const output = document.querySelector("#prompt-output");
 const copyButton = document.querySelector("#copy-button");
 const resetButton = document.querySelector("#reset-button");
-const presetName = document.querySelector("#preset-name");
-const presetSelect = document.querySelector("#preset-select");
-const savePresetButton = document.querySelector("#save-preset");
-const deletePresetButton = document.querySelector("#delete-preset");
 const toast = document.querySelector("#toast");
-const presetCard = document.querySelector(".preset-card");
 
 function loadObject(key, fallback = {}) {
   try {
@@ -79,6 +74,69 @@ function createColorPicker(field) {
   wrap.append(button, panel); return wrap;
 }
 
+const rangeSummaryText = (id) => {
+  const summary = catalog.measurementSummary(id, state);
+  if (typeof summary === "string") return summary;
+  return summary?.text || `${state[id]}cm`;
+};
+
+function refreshRangeControls() {
+  catalog.visibleFields(state).filter(({ type }) => type === "range").forEach((field) => {
+    const input = form.querySelector(`input[data-measurement="${field.id}"]`);
+    if (input) {
+      input.value = state[field.id];
+      input.setAttribute("aria-valuetext", rangeSummaryText(field.id));
+    }
+    const summary = form.querySelector(`[data-measurement-summary="${field.id}"]`);
+    if (summary) summary.textContent = rangeSummaryText(field.id);
+    const linkButton = form.querySelector(`[data-relink-measurement="${field.id}"]`);
+    if (linkButton) {
+      const linked = catalog.isMeasurementLinked(state, field.id);
+      linkButton.disabled = linked;
+      linkButton.textContent = linked ? "身長と連動中" : "身長基準に戻す";
+    }
+  });
+}
+
+function createRangeControl(field) {
+  const wrap = document.createElement("div"); wrap.className = "range-control";
+  const heading = document.createElement("div"); heading.className = "range-heading";
+  const summary = document.createElement("output"); summary.className = "range-summary";
+  summary.htmlFor = field.id; summary.dataset.measurementSummary = field.id; summary.setAttribute("aria-live", "polite");
+  summary.textContent = rangeSummaryText(field.id);
+  heading.append(summary);
+
+  if (field.linked) {
+    const relink = document.createElement("button"); relink.type = "button"; relink.className = "range-link";
+    relink.dataset.relinkMeasurement = field.id;
+    relink.disabled = catalog.isMeasurementLinked(state, field.id);
+    relink.textContent = relink.disabled ? "身長と連動中" : "身長基準に戻す";
+    relink.addEventListener("click", () => {
+      state = catalog.relinkMeasurement(state, field.id) || state;
+      persistState(); refreshRangeControls(); renderOutput();
+    });
+    heading.append(relink);
+  }
+
+  const input = document.createElement("input");
+  input.type = "range"; input.className = "range-input"; input.id = field.id; input.name = field.id;
+  input.min = field.min; input.max = field.max; input.step = field.step; input.value = state[field.id];
+  input.dataset.measurement = field.id; input.setAttribute("aria-label", field.label);
+  input.setAttribute("aria-valuetext", rangeSummaryText(field.id));
+  input.addEventListener("input", () => {
+    const value = Number(input.value);
+    state = field.id === "height"
+      ? catalog.applyHeightChange(state, value) || state
+      : catalog.setManualMeasurement(state, field.id, value) || state;
+    persistState(); refreshRangeControls(); renderOutput();
+  });
+
+  const scale = document.createElement("div"); scale.className = "range-scale";
+  scale.innerHTML = `<span>${field.min}cm</span><span>${field.max}cm</span>`;
+  wrap.append(heading, input, scale);
+  return wrap;
+}
+
 document.addEventListener("click", (event) => {
   if (event.target.closest(".color-picker")) return;
   document.querySelectorAll(".color-panel:not([hidden])").forEach((item) => { item.hidden = true; });
@@ -91,7 +149,7 @@ function renderForm() {
     eye: "目", mouth: "口", person: "身体サイズ", "outfit-classification": "衣装分類",
     outerwear: "アウター", top: "トップス", bottom: "ボトムス", onepiece: "上下一体衣装",
     "upper-underwear": "上半身の下着", "lower-underwear": "下半身の下着", shoe: "靴",
-    hair: "髪", presentation: "人物演出", camera: "カメラ", environment: "撮影環境",
+    hair: "髪", character: "人物の特徴",
   };
   catalog.visibleFields(state).forEach((field) => {
     if (!sections.has(field.section)) {
@@ -109,7 +167,10 @@ function renderForm() {
     }
     const row = document.createElement("div"); row.className = "field-row"; row.dataset.field = field.id;
     const label = document.createElement("label"); label.htmlFor = field.id; label.textContent = field.label;
-    row.append(label, field.type === "color" ? createColorPicker(field) : createSelect(field)); target.append(row);
+    const control = field.type === "color" ? createColorPicker(field)
+      : field.type === "range" ? createRangeControl(field)
+        : createSelect(field);
+    row.append(label, control); target.append(row);
   });
 }
 
@@ -129,29 +190,9 @@ async function copyPrompt() {
   catch { output.select(); document.execCommand("copy"); }
   showToast("指示文をコピーしました");
 }
-const presets = () => loadObject(appConfig.presetsKey);
-function refreshPresets(selected = "") {
-  presetSelect.innerHTML = '<option value="">プリセットを選択</option>';
-  Object.keys(presets()).sort((a, b) => a.localeCompare(b, "ja")).forEach((name) => {
-    const option = document.createElement("option"); option.value = name; option.textContent = name; presetSelect.append(option);
-  });
-  presetSelect.value = selected;
-}
 
 copyButton.addEventListener("click", copyPrompt);
 resetButton.addEventListener("click", () => { state = stateFromValues(); persistState(); renderState(); showToast("基準設定に戻しました"); });
-savePresetButton.addEventListener("click", () => {
-  const name = presetName.value.trim(); if (!name) return showToast("プリセット名を入力してください");
-  const all = presets(); all[name] = { ...state }; localStorage.setItem(appConfig.presetsKey, JSON.stringify(all)); presetName.value = ""; refreshPresets(name); showToast(catalog.presetMessage("save", name));
-});
-presetSelect.addEventListener("change", () => {
-  const name = presetSelect.value; const selected = presets()[name]; if (!selected) return;
-  state = stateFromValues(selected); persistState(); renderState(presetCard); refreshPresets(name); showToast(catalog.presetMessage("load", name));
-});
-deletePresetButton.addEventListener("click", () => {
-  if (!presetSelect.value) return showToast("削除するプリセットを選択してください");
-  const name = presetSelect.value; const all = presets(); delete all[name]; localStorage.setItem(appConfig.presetsKey, JSON.stringify(all)); refreshPresets(); showToast(catalog.presetMessage("delete", name));
-});
 
-renderState(); refreshPresets();
+renderState();
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));

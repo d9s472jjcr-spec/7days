@@ -9,7 +9,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=8.0.0">
+  <link rel="stylesheet" href="./styles.css?v=9.0.0">
 </head>
 <body>
   <header class="hero">
@@ -21,27 +21,13 @@
       <form id="prompt-form" class="form-column" autocomplete="off"></form>
 
       <div class="output-column">
-        <section class="card preset-card">
-          <h2>プリセット</h2>
-          <label for="preset-select">保存済み設定</label>
-          <div class="preset-actions">
-            <select id="preset-select"></select>
-            <button id="delete-preset" class="button button-quiet" type="button">削除</button>
-          </div>
-          <label for="preset-name">現在の設定を保存</label>
-          <div class="preset-actions">
-            <input id="preset-name" maxlength="30" placeholder="例：白シャツ・スタジオ">
-            <button id="save-preset" class="button button-secondary" type="button">保存</button>
-          </div>
-        </section>
-
         <section class="card output-card">
           <div class="output-heading">
             <h2>生成された指示文</h2>
             <span id="line-count" class="line-count"></span>
           </div>
           <textarea id="prompt-output" readonly aria-label="生成された指示文"></textarea>
-          <p class="privacy">入力内容とプリセットはこの端末内だけに保存されます。</p>
+          <p class="privacy">入力内容はこの端末内だけに保存されます。</p>
         </section>
       </div>
     </div>
@@ -57,6 +43,6 @@
   </nav>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
-  <script type="module" src="./src/app.js?v=8.0.0"></script>
+  <script type="module" src="./src/app.js?v=9.0.0"></script>
 </body>
 </html>

@@ -2,10 +2,15 @@ import * as catalog from "./unified-catalog.js";
 
 export const appConfig = Object.freeze({
   catalog,
+  storageKey: "7days:unified:last-values:v2",
+  schemaKey: "7days:unified:schema-version",
+  schemaVersion: "2",
+});
+
+export const legacyUnifiedKeys = Object.freeze({
   storageKey: "7days:unified:last-values:v1",
   presetsKey: "7days:unified:presets:v1",
   schemaKey: "7days:unified:schema-version",
-  schemaVersion: "1",
 });
 
 export const legacyPhotoKeys = Object.freeze({
@@ -28,6 +33,11 @@ const lowerUnderwearMigration = Object.freeze({
   casual_bottom_46: "lace_panties",
 });
 
+const legacyMeasurementAnchors = Object.freeze({
+  bust: Object.freeze({ restrained: 79, standard: 84, rich: 89, veryRich: 94 }),
+  hip: Object.freeze({ restrained: 80, standard: 85, rich: 90, veryRich: 95 }),
+});
+
 function parseObject(value) {
   try {
     const parsed = JSON.parse(value);
@@ -37,44 +47,37 @@ function parseObject(value) {
 
 function mapLegacyExpression(value, target) {
   const text = String(value || "");
-  const eye = catalog.faceFields.find(({ id }) => id === "eyeExpression").options;
-  const mouth = catalog.faceFields.find(({ id }) => id === "mouthExpression").options;
-  if (text.includes("喜び")) { target.eyeExpression = eye[1].value; target.mouthExpression = mouth[4].value; }
-  else if (text.includes("怒り")) { target.eyeExpression = eye[4].value; target.mouthExpression = mouth[13].value; }
-  else if (text.includes("悲しみ")) { target.eyeExpression = eye[5].value; target.mouthExpression = mouth[14].value; }
-  else if (text.includes("真剣")) { target.eyeExpression = eye[2].value; target.mouthExpression = mouth[0].value; }
+  const eye = catalog.faceFields.find(({ id }) => id === "eyeExpression")?.options || [];
+  const mouth = catalog.faceFields.find(({ id }) => id === "mouthExpression")?.options || [];
+  if (text.includes("喜び")) { target.eyeExpression = eye[1]?.value; target.mouthExpression = mouth[4]?.value; }
+  else if (text.includes("怒り")) { target.eyeExpression = eye[4]?.value; target.mouthExpression = mouth[13]?.value; }
+  else if (text.includes("悲しみ")) { target.eyeExpression = eye[5]?.value; target.mouthExpression = mouth[14]?.value; }
+  else if (text.includes("真剣")) { target.eyeExpression = eye[2]?.value; target.mouthExpression = mouth[0]?.value; }
 }
 
-function mapLegacyShooting(values, target) {
-  const fields = Object.fromEntries(catalog.shootingFields.map((field) => [field.id, field]));
-  const pick = (id, index) => fields[id].options[index]?.value || catalog.defaults[id];
-  const valid = (id, value) => fields[id].options.some((option) => option.value === value);
-
-  if (!valid("pose", target.pose)) target.pose = catalog.defaults.pose;
-  if (!valid("framing", target.framing)) {
-    const text = String(values.framing || "");
-    target.framing = text.includes("太もも") ? pick("framing", 2)
-      : text.includes("腰上") ? pick("framing", 3)
-        : text.includes("バストアップ") ? pick("framing", 4)
-          : pick("framing", 0);
-  }
-  if (!valid("cameraAngle", target.cameraAngle)) {
-    const text = String(values.cameraAngle || "");
-    target.cameraAngle = text.includes("高い") ? pick("cameraAngle", 1)
-      : text.includes("低い") ? pick("cameraAngle", 4)
-        : pick("cameraAngle", 0);
-  }
-  ["cameraDirection", "background"].forEach((id) => {
-    if (!valid(id, target[id])) target[id] = catalog.defaults[id];
-  });
-  if (!valid("lighting", target.lighting)) target.lighting = catalog.defaults.lighting;
+function migrateLegacyMeasurement(id, value) {
+  const numeric = Number(value);
+  if (Number.isFinite(numeric)) return Math.round(numeric);
+  const text = String(value || "");
+  const centimeter = text.match(/(\d{2,3}(?:\.\d+)?)\s*cm/i);
+  if (centimeter) return Math.round(Number(centimeter[1]));
+  const anchors = legacyMeasurementAnchors[id];
+  if (text.includes("とても豊")) return anchors.veryRich;
+  if (text.includes("豊")) return anchors.rich;
+  if (text.includes("標準")) return anchors.standard;
+  if (text.includes("控え")) return anchors.restrained;
+  return catalog.defaults[id];
 }
 
-export function migrateLegacyPhotoValues(values = {}) {
+function migrateSharedValues(values = {}) {
   const migrated = { ...catalog.defaults };
+  const newBodyKeys = new Set([
+    "height", "bust", "waist", "hip", "bustLinked", "waistLinked", "hipLinked", "personFeature",
+  ]);
   Object.keys(migrated).forEach((key) => {
-    if (Object.hasOwn(values, key)) migrated[key] = values[key];
+    if (!newBodyKeys.has(key) && Object.hasOwn(values, key)) migrated[key] = values[key];
   });
+
   mapLegacyExpression(values.expression, migrated);
   if (upperUnderwearMigration[values.topDesign]) {
     migrated.upperUnderwear = upperUnderwearMigration[values.topDesign];
@@ -86,23 +89,49 @@ export function migrateLegacyPhotoValues(values = {}) {
     migrated.lowerUnderwearColor = values.bottomColor || "ホワイト";
     migrated.bottomDesign = "none";
   }
-  mapLegacyShooting(values, migrated);
+
+  const hasBust = Object.hasOwn(values, "bust") && values.bust !== "" && values.bust != null;
+  const hasHip = Object.hasOwn(values, "hip") && values.hip !== "" && values.hip != null;
+  migrated.height = catalog.defaults.height;
+  migrated.waist = catalog.defaults.waist;
+  migrated.personFeature = catalog.defaults.personFeature;
+  migrated.bust = hasBust ? migrateLegacyMeasurement("bust", values.bust) : catalog.defaults.bust;
+  migrated.hip = hasHip ? migrateLegacyMeasurement("hip", values.hip) : catalog.defaults.hip;
+  migrated.bustLinked = !hasBust;
+  migrated.waistLinked = true;
+  migrated.hipLinked = !hasHip;
+
   return catalog.normalizeState(migrated);
 }
 
+export function migrateUnifiedV1Values(values = {}) {
+  return migrateSharedValues(values);
+}
+
+export function migrateLegacyPhotoValues(values = {}) {
+  return migrateSharedValues(values);
+}
+
 export function prepareUnifiedStorage(storage) {
-  if (storage.getItem(appConfig.schemaKey) === appConfig.schemaVersion) return false;
+  const schemaIsCurrent = storage.getItem(appConfig.schemaKey) === appConfig.schemaVersion;
+  if (schemaIsCurrent && storage.getItem(appConfig.storageKey)) return false;
+
+  let changed = false;
   if (!storage.getItem(appConfig.storageKey)) {
-    const legacy = parseObject(storage.getItem(legacyPhotoKeys.storageKey));
-    if (legacy) storage.setItem(appConfig.storageKey, JSON.stringify(migrateLegacyPhotoValues(legacy)));
-  }
-  if (!storage.getItem(appConfig.presetsKey)) {
-    const legacyPresets = parseObject(storage.getItem(legacyPhotoKeys.presetsKey));
-    if (legacyPresets) {
-      const migrated = Object.fromEntries(Object.entries(legacyPresets).map(([name, values]) => [name, migrateLegacyPhotoValues(values)]));
-      storage.setItem(appConfig.presetsKey, JSON.stringify(migrated));
+    const unifiedV1 = parseObject(storage.getItem(legacyUnifiedKeys.storageKey));
+    const photoV8 = unifiedV1 ? null : parseObject(storage.getItem(legacyPhotoKeys.storageKey));
+    if (unifiedV1) {
+      storage.setItem(appConfig.storageKey, JSON.stringify(migrateUnifiedV1Values(unifiedV1)));
+      changed = true;
+    } else if (photoV8) {
+      storage.setItem(appConfig.storageKey, JSON.stringify(migrateLegacyPhotoValues(photoV8)));
+      changed = true;
     }
   }
-  storage.setItem(appConfig.schemaKey, appConfig.schemaVersion);
-  return true;
+
+  if (!schemaIsCurrent) {
+    storage.setItem(appConfig.schemaKey, appConfig.schemaVersion);
+    changed = true;
+  }
+  return changed;
 }
